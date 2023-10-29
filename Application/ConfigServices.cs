@@ -1,5 +1,7 @@
-﻿using Application.Features.Users.Login;
+﻿using Application.Features.Users.Create;
+using Application.Features.Users.Login;
 using Application.Pipelines;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
@@ -12,7 +14,7 @@ namespace Application
             services.AddMediatR(config => config.RegisterServicesFromAssemblies(
                        Assembly.GetExecutingAssembly()));
 
-            services.AddValidatorsFromAssembly(typeof(LoginRequestValidator).Assembly);
+            services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);
 
             services.AddTransient(
                typeof(IPipelineBehavior<,>),

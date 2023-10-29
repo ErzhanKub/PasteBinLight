@@ -16,7 +16,7 @@ namespace Application.Features.Users.Login
     {
         public LoginRequestValidator()
         {
-            RuleFor(l => l.Username).NotEmpty().Length(1,200);
+            RuleFor(l => l.Username).NotEmpty().Length(1, 200);
             RuleFor(l => l.Password).NotEmpty().Length(1, 200);
         }
     }
@@ -35,19 +35,18 @@ namespace Application.Features.Users.Login
         public async Task<Result<string>> Handle(LoginRequest request, CancellationToken cancellationToken)
         {
             var user = await _userRepository.CheckUserCredentialsAsync(request.Username, request.Password);
-            if (user is not null)
+            if (user is null)
+                return Result.Fail("Username or password is incorrect");
+
+            var claims = new List<Claim>
             {
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.Username),
-                    new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, user.Role.ToString())
-                };
-                var tokenString = GetTokenString(claims, DateTime.UtcNow.AddMinutes(30));
-                return Result.Ok(tokenString);
-            }
-            return Result.Fail("Email or password is incorrect");
+               new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+               new Claim(ClaimTypes.Name, user.Username),
+               new Claim(ClaimTypes.Email, user.Email),
+               new Claim(ClaimTypes.Role, user.Role.ToString())
+            };
+            var tokenString = GetTokenString(claims, DateTime.UtcNow.AddMinutes(30));
+            return Result.Ok(tokenString);
         }
 
         private string GetTokenString(List<Claim> claims, DateTime exp)

@@ -1,4 +1,5 @@
-﻿using Application.Features.Users.Login;
+﻿using Application.Features.Users.Create;
+using Application.Features.Users.Login;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,9 +24,19 @@ namespace WebApi.Controllers
         public async Task<IActionResult> Login(LoginRequest request)
         {
             var token = await _mediator.Send(request);
-            if(token.IsSuccess)
+            if (token.IsSuccess)
                 return Ok(token);
             return BadRequest(token.Reasons);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(CreateUserCommand command)
+        {
+            var result = await _mediator.Send(command);
+            if (result.IsSuccess)
+                return Ok(result.Value);
+            return BadRequest(result.Reasons);
         }
     }
 }
