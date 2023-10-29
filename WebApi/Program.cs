@@ -1,4 +1,6 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Application;
+using Infrastructure;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Text;
@@ -71,6 +73,8 @@ builder.Services.AddAuthentication().AddJwtBearer(opts =>
 //});
 ///////////////////////////////////////////////////////////////////////////
 
+builder.Services.AddApplication();
+builder.Services.AddInfrastruct(builder.Configuration);
 
 var app = builder.Build();
 

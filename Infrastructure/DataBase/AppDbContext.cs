@@ -57,7 +57,6 @@ namespace Infrastructure.DataBase
                 Likes = 183,
                 DisLikes = 13,
                 IsPrivate = false,
-                User = user,
                 UserId = userId,
             };
 
