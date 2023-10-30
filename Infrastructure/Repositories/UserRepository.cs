@@ -50,11 +50,9 @@ namespace Infrastructure.Repositories
             return await _dbcontext.Users.AsNoTracking().ToListAsync();
         }
 
-        public async Task<User> GetByIdAsync(Guid id)
+        public async Task<User?> GetByIdAsync(Guid id)
         {
             var user = await _dbcontext.Users.FirstOrDefaultAsync(u => u.Id == id);
-            if (user is null)
-                throw new ArgumentNullException("User not found");
             return user;
         }
 

@@ -1,7 +1,5 @@
 ﻿using Application.Features.Users.Create;
-using Application.Features.Users.Login;
 using Application.Pipelines;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 

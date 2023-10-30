@@ -13,7 +13,7 @@ namespace Infrastructure.Repositories
         public const string bucketName = "basketforfinalproject";
         public const string accessKey = "AKIARQAYJTSFMJZ3APWV";
         public const string secretKey = "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";
-        
+
         private readonly AppDbContext _dbcontext;
 
         public PosteRepository(AppDbContext dbcontext)
@@ -39,12 +39,24 @@ namespace Infrastructure.Repositories
             return _dbcontext.Postes.AsNoTracking().ToListAsync();
         }
 
-        public async Task<Poste> GetByIdAsync(Guid id)
+        public async Task<Poste?> GetByIdAsync(Guid id)
         {
             var poste = await _dbcontext.Postes.FirstOrDefaultAsync(p => p.Id == id);
-            if (poste == null)
-                throw new ArgumentNullException(nameof(poste), "Poste not found");
             return poste;
+        }
+
+        public Guid GetDecodedGuid(string decodedBytes)
+        {
+            byte[] decoded = Convert.FromBase64String(decodedBytes);
+            var guid = new Guid(decoded);
+            return guid;
+        }
+
+        public string GetEncodedGuid(Guid guid)
+        {
+            byte[] guidBytes = guid.ToByteArray();
+            string base64Guid = Convert.ToBase64String(guidBytes);
+            return base64Guid;
         }
 
         public async Task<string> GetTextFromCloudAsync(Uri url)
@@ -86,7 +98,7 @@ namespace Infrastructure.Repositories
             {
                 BucketName = bucketName,
                 Key = objectKey,
-                Expires = DateTime.MaxValue
+                Expires = DateTime.UtcNow.AddDays(7)
             };
             return client.GetPreSignedURL(urlRequest);
         }

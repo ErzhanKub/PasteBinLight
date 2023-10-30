@@ -25,7 +25,7 @@ namespace WebApi.Controllers
         {
             var token = await _mediator.Send(request);
             if (token.IsSuccess)
-                return Ok(token);
+                return Ok(token.Value);
             return BadRequest(token.Reasons);
         }
 

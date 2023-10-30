@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\Postes\" />
+    <Folder Include="Features\Users\Update\" />
   </ItemGroup>
 
 </Project>
