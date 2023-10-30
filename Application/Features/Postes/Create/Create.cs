@@ -7,7 +7,10 @@ namespace Application.Features.Postes.Create
     public record CreatePosteCommand : IRequest<Result<string>>
     {
         public Guid UserId { get; set; }
-        public CreatePosteDto? Poste { get; init; }
+        public required string Text { get; init; }
+        public string? Title { get; init; }
+        public DateTime DeadLine { get; init; }
+        public bool IsPrivate { get; init; }
     }
 
     public class CreatePosteCommandValidator : AbstractValidator<CreatePosteCommand>
@@ -15,14 +18,9 @@ namespace Application.Features.Postes.Create
         public CreatePosteCommandValidator()
         {
             RuleFor(u => u.UserId).NotEmpty();
-            RuleFor(p => p.Poste).NotNull();
-
-            When(p => p.Poste != null, () =>
-            {
-                RuleFor(p => p.Poste!.Text).NotEmpty();
-                RuleFor(p => p.Poste!.Title).Length(0, 200);
-                RuleFor(p => p.Poste!.DeadLine).GreaterThanOrEqualTo(DateTime.Now);
-            });
+            RuleFor(t => t.Text).NotEmpty();
+            RuleFor(t => t.Title).Length(1,200);
+            RuleFor(d => d.DeadLine).GreaterThanOrEqualTo(DateTime.Now);
         }
     }
 
@@ -47,14 +45,14 @@ namespace Application.Features.Postes.Create
                 return Result.Fail("User not found");
 
             var posteId = Guid.NewGuid();
-            var urlCloud = await _posteRepository.UploadTextToCloudAsync(posteId.ToString(), request.Poste!.Text);
+            var urlCloud = await _posteRepository.UploadTextToCloudAsync(posteId.ToString(), request.Text);
             var poste = new Poste
             {
                 Id = posteId,
                 DateCreated = DateTime.Now,
-                DeadLine = request.Poste.DeadLine,
-                IsPrivate = request.Poste.IsPrivate,
-                Title = request.Poste.Title,
+                DeadLine = request.DeadLine,
+                IsPrivate = request.IsPrivate,
+                Title = request.Title,
                 Url = new Uri(urlCloud),
                 User = user,
                 UserId = user.Id,

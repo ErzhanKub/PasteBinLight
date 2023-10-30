@@ -6,21 +6,18 @@ namespace Application.Features.Users.Create
 {
     public class CreateUserCommand : IRequest<Result<Guid>>
     {
-        public CreateUserDto? CreateUserDto { get; init; }
+        public required string Username { get; init; }
+        public required string Password { get; init; }
+        public required string Email { get; init; }
     }
 
-   public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
+    public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
     {
         public CreateUserCommandValidator()
         {
-            RuleFor(c => c.CreateUserDto).NotNull();
-            When(c => c.CreateUserDto != null,
-                () =>
-                {
-                    RuleFor(c => c.CreateUserDto!.Username).NotEmpty().Length(1, 200);
-                    RuleFor(c => c.CreateUserDto!.Password).NotEmpty().Length(1, 200);
-                    RuleFor(c => c.CreateUserDto!.Email).NotEmpty().EmailAddress();
-                });
+            RuleFor(c => c.Username).NotEmpty().Length(1, 200);
+            RuleFor(c => c.Password).NotEmpty().Length(1, 200);
+            RuleFor(c => c.Email).NotEmpty().EmailAddress();
         }
     }
 
@@ -40,9 +37,9 @@ namespace Application.Features.Users.Create
             var user = new User
             {
                 Id = Guid.NewGuid(),
-                Username = request.CreateUserDto!.Username,
-                Password = request.CreateUserDto.Password,
-                Email = request.CreateUserDto.Email,
+                Username = request.Username,
+                Password = request.Password,
+                Email = request.Email,
                 Postes = new(),
                 Role = Domain.Enums.Role.User
             };

@@ -26,8 +26,6 @@ namespace Application.Features.Postes.Get.GetOne
 
         public async Task<Result<GetOnePosteDto>> Handle(GetOnePosteByUrlRequest request, CancellationToken cancellationToken)
         {
-            string l = "lh/api/Poste/UmOIgVdxwUKDGp5CtczqHw==";
-
             string[] parts = request.Url!.ToString().Split('/');
 
             string key = parts.Last();
@@ -35,6 +33,8 @@ namespace Application.Features.Postes.Get.GetOne
             var posteId = _posteRepository.GetDecodedGuid(key);
 
             var poste = await _posteRepository.GetByIdAsync(posteId);
+            if (poste == null)
+                return Result.Fail("Poste not found");
 
             var text = await _posteRepository.GetTextFromCloudAsync(poste.Url);
 
@@ -46,7 +46,7 @@ namespace Application.Features.Postes.Get.GetOne
                 DisLikes = poste.DisLikes,
                 IsPrivate = poste.IsPrivate,
                 Likes = poste.Likes,
-                Text = text,
+                Text = text ?? string.Empty,
                 Title = poste.Title,
             };
 
