@@ -5,6 +5,7 @@ namespace Application.Features.Postes.Get.GetOne
     public class GetOnePosteByUrlRequest : IRequest<Result<GetOnePosteDto>>
     {
         public Uri? Url { get; init; }
+        public Guid UserId { get; init; }
     }
 
     public class GetOnePosteByUrlValidator : AbstractValidator<GetOnePosteByUrlRequest>
@@ -18,7 +19,6 @@ namespace Application.Features.Postes.Get.GetOne
     public class GetOnePosteByUrlHandler : IRequestHandler<GetOnePosteByUrlRequest, Result<GetOnePosteDto>>
     {
         private readonly IPosteRepository _posteRepository;
-
         public GetOnePosteByUrlHandler(IPosteRepository posteRepository)
         {
             _posteRepository = posteRepository ?? throw new ArgumentNullException(nameof(posteRepository));
@@ -35,6 +35,11 @@ namespace Application.Features.Postes.Get.GetOne
             var poste = await _posteRepository.GetByIdAsync(posteId);
             if (poste == null)
                 return Result.Fail("Poste not found");
+
+            if (poste.IsPrivate && poste.UserId != request.UserId)
+            {
+                return Result.Fail<GetOnePosteDto>("Access denied");
+            }
 
             var text = await _posteRepository.GetTextFromCloudAsync(poste.Url);
 

@@ -1,6 +1,5 @@
 ﻿using Application.Features.Postes.Create;
 using Application.Features.Postes.Get.GetOne;
-using Azure.Core;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
