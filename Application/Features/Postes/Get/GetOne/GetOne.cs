@@ -1,8 +1,9 @@
-﻿using Domain.Repositories;
+﻿using Application.Contracts;
+using Domain.Repositories;
 
 namespace Application.Features.Postes.Get.GetOne
 {
-    public class GetOnePosteByUrlRequest : IRequest<Result<GetOnePosteDto>>
+    public class GetOnePosteByUrlRequest : IRequest<Result<PosteDto>>
     {
         public string? EncodedGuid { get; init; }
         public Guid UserId { get; init; }
@@ -16,7 +17,7 @@ namespace Application.Features.Postes.Get.GetOne
         }
     }
 
-    public class GetOnePosteByUrlHandler : IRequestHandler<GetOnePosteByUrlRequest, Result<GetOnePosteDto>>
+    public class GetOnePosteByUrlHandler : IRequestHandler<GetOnePosteByUrlRequest, Result<PosteDto>>
     {
         private readonly IPosteRepository _posteRepository;
         public GetOnePosteByUrlHandler(IPosteRepository posteRepository)
@@ -24,7 +25,7 @@ namespace Application.Features.Postes.Get.GetOne
             _posteRepository = posteRepository ?? throw new ArgumentNullException(nameof(posteRepository));
         }
 
-        public async Task<Result<GetOnePosteDto>> Handle(GetOnePosteByUrlRequest request, CancellationToken cancellationToken)
+        public async Task<Result<PosteDto>> Handle(GetOnePosteByUrlRequest request, CancellationToken cancellationToken)
         {
             var posteId = _posteRepository.GetDecodedGuid(request.EncodedGuid!);
 
@@ -34,13 +35,13 @@ namespace Application.Features.Postes.Get.GetOne
 
             if (poste.IsPrivate && poste.UserId != request.UserId)
             {
-                return Result.Fail<GetOnePosteDto>("Access denied");
+                return Result.Fail<PosteDto>("Access denied");
             }
 
 
             var text = await _posteRepository.GetTextFromCloudAsync(poste.Url);
 
-            var response = new GetOnePosteDto
+            var response = new PosteDto
             {
                 Id = poste.Id,
                 DateCreated = poste.DateCreated,

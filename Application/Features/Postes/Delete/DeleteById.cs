@@ -41,7 +41,7 @@ namespace Application.Features.Postes.Delete
             if (deletedPoste == null)
                 return Result.Fail<Guid>("Post not found");
 
-            await _posteRepository.DeleteFileFromCloudAsync(deletedPoste.Id.ToString());
+            await _posteRepository.DeleteTextFromCloudAsync(deletedPoste.Id.ToString());
 
             var response = await _posteRepository.DeleteRangeAsync(deletedPoste.Id);
             _userRepository.Update(user);

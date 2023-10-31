@@ -27,7 +27,7 @@ namespace Infrastructure.Repositories
             return entity.Id;
         }
 
-        public async Task DeleteFileFromCloudAsync(string keyName)
+        public async Task DeleteTextFromCloudAsync(string keyName)
         {
             using var client = new AmazonS3Client(accessKey, secretKey, RegionEndpoint.EUNorth1);
             var deletedRequest = new DeleteObjectRequest
@@ -105,13 +105,16 @@ namespace Infrastructure.Repositories
             };
             await client.PutObjectAsync(request);
 
-            var urlRequest = new GetPreSignedUrlRequest
-            {
-                BucketName = bucketName,
-                Key = objectKey,
-                Expires = DateTime.UtcNow.AddDays(7)
-            };
-            return client.GetPreSignedURL(urlRequest);
+            //var urlRequest = new GetPreSignedUrlRequest
+            //{
+            //    BucketName = bucketName,
+            //    Key = objectKey,
+            //    //Expires = DateTime.UtcNow.AddDays(7),
+            //};
+            //var url = client.GetPreSignedURL(urlRequest);
+
+            var url = "https://basketforfinalproject.s3.eu-north-1.amazonaws.com/" + objectKey;
+            return url;
         }
     }
 }
