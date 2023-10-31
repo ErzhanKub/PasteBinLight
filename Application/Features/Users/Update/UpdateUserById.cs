@@ -3,7 +3,7 @@ using Domain.Repositories;
 
 namespace Application.Features.Users.Update;
 
-public class UpdateUserByIdCommand : IRequest<Result<UpdateUserByIdDto>>
+public record UpdateUserByIdCommand : IRequest<Result<UpdateUserByIdDto>>
 {
     public Guid Id { get; init; }
     public string? Username { get; init; }
@@ -16,7 +16,7 @@ public class UpdateUserByIdValidator : AbstractValidator<UpdateUserByIdDto>
     public UpdateUserByIdValidator()
     {
         RuleFor(u => u.Username).NotEmpty().Length(2, 200);
-        RuleFor(p => p.Password).NotEmpty().Length(2, 200);
+        RuleFor(p => p.Password).NotEmpty().Length(5, 200);
         RuleFor(e => e.Email).EmailAddress().NotEmpty();
     }
 }
@@ -46,7 +46,11 @@ public class UpdateUserByIdCommandHandler : IRequestHandler<UpdateUserByIdComman
             user.Email = request.Email;
 
         _userRepository.Update(user);
+<<<<<<< Updated upstream
         await _uow.SaveCommitAsync();
+=======
+         await _uow.SaveCommitAsync();
+>>>>>>> Stashed changes
 
         var response = new UpdateUserByIdDto
         {
