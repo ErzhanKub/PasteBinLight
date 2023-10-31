@@ -24,6 +24,8 @@ namespace Infrastructure.DataBase
                  .WithMany(u => u.Postes)
                  .HasForeignKey(p => p.UserId)
                  .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<User>()
+                .Navigation(u => u.Postes).AutoInclude();
         }
 
         private void SeedData(ModelBuilder modelBuilder)

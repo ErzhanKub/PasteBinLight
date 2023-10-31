@@ -27,6 +27,17 @@ namespace Infrastructure.Repositories
             return entity.Id;
         }
 
+        public async Task DeleteFileFromCloudAsync(string keyName)
+        {
+            using var client = new AmazonS3Client(accessKey, secretKey, RegionEndpoint.EUNorth1);
+            var deletedRequest = new DeleteObjectRequest
+            {
+                BucketName = bucketName,
+                Key = keyName
+            };
+            await client.DeleteObjectAsync(deletedRequest);
+        }
+
         public Task<Guid[]> DeleteRangeAsync(params Guid[] ids)
         {
             var posteToDelete = _dbcontext.Postes.Where(p => ids.Contains(p.Id));

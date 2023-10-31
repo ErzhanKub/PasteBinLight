@@ -1,4 +1,5 @@
 ﻿using Application.Features.Postes.Create;
+using Application.Features.Postes.Delete;
 using Application.Features.Postes.Get.GetOne;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -45,6 +46,18 @@ namespace WebApi.Controllers
             if (response.IsSuccess)
                 return Ok(response.Value);
             return BadRequest(response.Reasons);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete(DeletePosteByIdsCommand command)
+        {
+            var user = HttpContext.User;
+            command.UserId = Helper.GetCurrentUserId(user);
+
+            var result = await _mediator.Send(command);
+            if (result.IsSuccess)
+                return Ok(result.Value);
+            return BadRequest(result.Reasons);
         }
 
         private bool AccessCheck(Guid id)

@@ -9,5 +9,6 @@ namespace Domain.Repositories
         public Task<string> GetTextFromCloudAsync(Uri url);
         public string GetEncodedGuid(Guid guid);
         public Guid GetDecodedGuid(string decodedBytes);
+        public Task DeleteFileFromCloudAsync(string keyName);
     }
 }
