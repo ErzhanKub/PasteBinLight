@@ -46,11 +46,8 @@ public class UpdateUserByIdCommandHandler : IRequestHandler<UpdateUserByIdComman
             user.Email = request.Email;
 
         _userRepository.Update(user);
-<<<<<<< Updated upstream
+
         await _uow.SaveCommitAsync();
-=======
-         await _uow.SaveCommitAsync();
->>>>>>> Stashed changes
 
         var response = new UpdateUserByIdDto
         {

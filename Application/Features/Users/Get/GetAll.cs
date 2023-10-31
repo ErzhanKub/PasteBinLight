@@ -1,9 +1,6 @@
 ﻿using Application.Contracts;
-using Application.Features.Users.Update;
-using Application.Shared;
 using Domain.Repositories;
 using Mapster;
-using Microsoft.AspNetCore.Mvc.DataAnnotations;
 
 namespace Application.Features.Users.Get;
 
@@ -26,6 +23,4 @@ public class GetAllRequestHandler : IRequestHandler<GetAllRequest, List<UserDto>
 
         return response;
     }
-
-
 }

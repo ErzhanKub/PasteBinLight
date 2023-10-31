@@ -113,8 +113,20 @@ namespace Infrastructure.Repositories
             //};
             //var url = client.GetPreSignedURL(urlRequest);
 
-            var url = "https://basketforfinalproject.s3.eu-north-1.amazonaws.com/" + objectKey;
+            var url = $"https://{bucketName}.s3.{RegionEndpoint.EUNorth1.SystemName}.amazonaws.com/{objectKey}";
             return url;
+        }
+
+        public async Task EditTextFromCloudeAsync(string objectKey, string text)
+        {
+            using var client = new AmazonS3Client(accessKey, secretKey, RegionEndpoint.EUNorth1);
+            var request = new PutObjectRequest
+            {
+                BucketName = bucketName,
+                Key = objectKey,
+                ContentBody = text
+            };
+            await client.PutObjectAsync(request);
         }
     }
 }

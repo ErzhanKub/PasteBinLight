@@ -1,9 +1,7 @@
 ﻿using Application.Features.Users.Delete;
 using Application.Features.Users.Get;
-using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace WebApi.Controllers
 {
