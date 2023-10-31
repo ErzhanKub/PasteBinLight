@@ -40,8 +40,7 @@ namespace Application.Features.Users.Create
                 Username = request.Username,
                 Password = request.Password,
                 Email = request.Email,
-                Postes = new(),
-                Role = Domain.Enums.Role.User
+                Role = Domain.Enums.Role.User,
             };
 
             await _userRepository.CreateAsync(user);

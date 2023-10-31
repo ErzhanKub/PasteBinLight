@@ -1,6 +1,9 @@
 ﻿using Application.Features.Users.Delete;
+using Application.Features.Users.Get;
+using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace WebApi.Controllers
 {
@@ -41,6 +44,19 @@ namespace WebApi.Controllers
             };
 
             var result = await _mediator.Send(command);
+
+            if (result.IsSuccess)
+                return Ok(result.Value);
+
+            return BadRequest(result.Reasons);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUserById(Guid id)
+        {
+            var request = new GetOneUserRequest { Id = id };
+
+            var result = await _mediator.Send(request);
 
             if (result.IsSuccess)
                 return Ok(result.Value);
