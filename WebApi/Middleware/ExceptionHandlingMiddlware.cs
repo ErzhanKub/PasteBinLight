@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using FluentResults;
+using System.Net;
 using WebApi.Dtos;
 
 namespace WebApi.Middlewere
@@ -24,7 +25,6 @@ namespace WebApi.Middlewere
             {
                 await HandleExeptionAsync(httpContext, ex.Message,
                       HttpStatusCode.InternalServerError, "MiddlewereErrorHandler");
-                throw;
             }
         }
 
