@@ -30,10 +30,17 @@ namespace WebApi.Controllers
             return Created($"/api/Poste/{result.Value}", result.Value);
         }
 
-        [HttpGet("{url}")]
-        public async Task<IActionResult> GetByUrl(Uri url)
+        [HttpGet]
+        public async Task<IActionResult> GetByUrl(string encodedGuid)
         {
-            var request = new GetOnePosteByUrlRequest {Url = url };
+            var currentUser = HttpContext.User;
+
+            var request = new GetOnePosteByUrlRequest
+            {
+                EncodedGuid = encodedGuid,
+                UserId = Helper.GetCurrentUserId(currentUser)
+            };
+
             var response = await _mediator.Send(request);
             if (response.IsSuccess)
                 return Ok(response.Value);

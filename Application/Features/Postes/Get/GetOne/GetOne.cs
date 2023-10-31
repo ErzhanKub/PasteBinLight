@@ -4,7 +4,7 @@ namespace Application.Features.Postes.Get.GetOne
 {
     public class GetOnePosteByUrlRequest : IRequest<Result<GetOnePosteDto>>
     {
-        public Uri? Url { get; init; }
+        public string? EncodedGuid { get; init; }
         public Guid UserId { get; init; }
     }
 
@@ -12,7 +12,7 @@ namespace Application.Features.Postes.Get.GetOne
     {
         public GetOnePosteByUrlValidator()
         {
-            RuleFor(u => u.Url).NotEmpty();
+            RuleFor(u => u.EncodedGuid).NotEmpty();
         }
     }
 
@@ -26,11 +26,7 @@ namespace Application.Features.Postes.Get.GetOne
 
         public async Task<Result<GetOnePosteDto>> Handle(GetOnePosteByUrlRequest request, CancellationToken cancellationToken)
         {
-            string[] parts = request.Url!.ToString().Split('/');
-
-            string key = parts.Last();
-
-            var posteId = _posteRepository.GetDecodedGuid(key);
+            var posteId = _posteRepository.GetDecodedGuid(request.EncodedGuid!);
 
             var poste = await _posteRepository.GetByIdAsync(posteId);
             if (poste == null)
@@ -40,6 +36,7 @@ namespace Application.Features.Postes.Get.GetOne
             {
                 return Result.Fail<GetOnePosteDto>("Access denied");
             }
+
 
             var text = await _posteRepository.GetTextFromCloudAsync(poste.Url);
 

@@ -16,17 +16,12 @@ namespace Infrastructure.Repositories
             _dbcontext = dbcontext;
         }
 
-        public async Task<User> CheckUserCredentialsAsync(string username, string password)
+        public async Task<User?> CheckUserCredentialsAsync(string username, string password)
         {
-            var user = await _dbcontext.Users.FirstOrDefaultAsync(u => u.Username == username);
-
-            if (user == null)
-                throw new ArgumentNullException("User not found");
-
             var hashedPassword = HashPassword(password);
 
-            if (hashedPassword != user.Password)
-                throw new ArgumentNullException("Incorrect password");
+            var user = await _dbcontext.Users
+                .FirstOrDefaultAsync(u => u.Username == username && u.Password == hashedPassword);
 
             return user;
         }

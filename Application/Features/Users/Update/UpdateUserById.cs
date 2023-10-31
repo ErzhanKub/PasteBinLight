@@ -29,12 +29,13 @@ public class UpdateUserByIdCommandHandler : IRequestHandler<UpdateUserByIdComman
     public UpdateUserByIdCommandHandler(IUserRepository userRepository, IUnitOfWork uow)
     {
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        _uow = uow ?? throw new NullReferenceException(nameof(uow));
+        _uow = uow ?? throw new ArgumentNullException(nameof(uow));
     }
 
     public async Task<Result<UpdateUserByIdDto>> Handle(UpdateUserByIdCommand request, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByIdAsync(request.Id);
+
         if (user == null)
             return Result.Fail("User is not found");
         if (request.Username != null)
@@ -45,7 +46,7 @@ public class UpdateUserByIdCommandHandler : IRequestHandler<UpdateUserByIdComman
             user.Email = request.Email;
 
         _userRepository.Update(user);
-        _uow.SaveCommitAsync();
+        await _uow.SaveCommitAsync();
 
         var response = new UpdateUserByIdDto
         {
@@ -57,5 +58,5 @@ public class UpdateUserByIdCommandHandler : IRequestHandler<UpdateUserByIdComman
         };
 
         return Result.Ok(response);
-    } 
+    }
 }

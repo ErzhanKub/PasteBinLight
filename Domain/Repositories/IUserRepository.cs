@@ -6,6 +6,6 @@ namespace Domain.Repositories
     public interface IUserRepository : IRepository<User>
     {
         string HashPassword(string password);
-        Task<User> CheckUserCredentialsAsync(string username, string password);
+        Task<User?> CheckUserCredentialsAsync(string username, string password);
     }
 }

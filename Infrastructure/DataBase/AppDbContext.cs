@@ -22,7 +22,8 @@ namespace Infrastructure.DataBase
             modelBuilder.Entity<Poste>()
                  .HasOne(p => p.User)
                  .WithMany(u => u.Postes)
-                 .HasForeignKey(p => p.UserId);
+                 .HasForeignKey(p => p.UserId)
+                 .OnDelete(DeleteBehavior.Cascade);
         }
 
         private void SeedData(ModelBuilder modelBuilder)
@@ -32,16 +33,16 @@ namespace Infrastructure.DataBase
             var user = new User
             {
                 Id = userId,
-                Username = "Mark",
-                Password = "qwerty",
-                Email = "mark@mail.com",
+                Username = "string",
+                Password = "473287f8298dba7163a897908958f7c0eae733e25d2e027992ea2edc9bed2fa8",
+                Email = "string@mail.com",
                 Role = Role.User,
             };
             var admin = new User
             {
                 Id = adminId,
-                Username = "erzhan",
-                Password = "string",
+                Username = "qwerty",
+                Password = "473287f8298dba7163a897908958f7c0eae733e25d2e027992ea2edc9bed2fa8",
                 Email = "erzhan@mail.com",
                 Role = Role.Admin,
             };

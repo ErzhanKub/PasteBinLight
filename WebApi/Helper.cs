@@ -8,7 +8,7 @@ namespace WebApi
         {
             var userId = currentUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
             var userRole = currentUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-            return (userId, userRole);
+            return (userId, userRole)!;
         }
 
         public static Guid GetCurrentUserId(ClaimsPrincipal currentUser)

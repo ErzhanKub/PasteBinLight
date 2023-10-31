@@ -62,15 +62,15 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("54cb59a4-f970-43e8-9a83-3918f7e892c1"),
-                            DateCreated = new DateTime(2023, 10, 29, 21, 39, 41, 200, DateTimeKind.Local).AddTicks(8949),
-                            DeadLine = new DateTime(2023, 11, 29, 21, 39, 41, 200, DateTimeKind.Local).AddTicks(8967),
+                            Id = new Guid("6a8274c8-b927-40c9-86a9-486dafe8f80f"),
+                            DateCreated = new DateTime(2023, 10, 31, 13, 58, 27, 970, DateTimeKind.Local).AddTicks(4953),
+                            DeadLine = new DateTime(2023, 11, 30, 13, 58, 27, 970, DateTimeKind.Local).AddTicks(4968),
                             DisLikes = 13L,
                             IsPrivate = false,
                             Likes = 183L,
                             Title = "My day",
                             Url = "https://www.youtube.com/",
-                            UserId = new Guid("3c53c069-0cc3-4e14-915f-33547ed41d99")
+                            UserId = new Guid("d2638162-bce7-4feb-a23a-c911c8f6e6a1")
                         });
                 });
 
@@ -105,19 +105,19 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("3c53c069-0cc3-4e14-915f-33547ed41d99"),
-                            Email = "mark@mail.com",
-                            Password = "qwerty",
+                            Id = new Guid("d2638162-bce7-4feb-a23a-c911c8f6e6a1"),
+                            Email = "string@mail.com",
+                            Password = "473287f8298dba7163a897908958f7c0eae733e25d2e027992ea2edc9bed2fa8",
                             Role = 1,
-                            Username = "Mark"
+                            Username = "string"
                         },
                         new
                         {
-                            Id = new Guid("91acd72e-488b-4e44-8b4b-0be95fba668d"),
+                            Id = new Guid("e4fefe5f-45f1-49ed-85c9-7c13f8b06d7c"),
                             Email = "erzhan@mail.com",
-                            Password = "string",
+                            Password = "473287f8298dba7163a897908958f7c0eae733e25d2e027992ea2edc9bed2fa8",
                             Role = 2,
-                            Username = "erzhan"
+                            Username = "qwerty"
                         });
                 });
 
@@ -125,7 +125,8 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany("Postes")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("User");
                 });

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -48,7 +49,8 @@ namespace Infrastructure.Migrations
                         name: "FK_Postes_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
@@ -56,14 +58,14 @@ namespace Infrastructure.Migrations
                 columns: new[] { "Id", "Email", "Password", "Role", "Username" },
                 values: new object[,]
                 {
-                    { new Guid("3c53c069-0cc3-4e14-915f-33547ed41d99"), "mark@mail.com", "qwerty", 1, "Mark" },
-                    { new Guid("91acd72e-488b-4e44-8b4b-0be95fba668d"), "erzhan@mail.com", "string", 2, "erzhan" }
+                    { new Guid("d2638162-bce7-4feb-a23a-c911c8f6e6a1"), "string@mail.com", "473287f8298dba7163a897908958f7c0eae733e25d2e027992ea2edc9bed2fa8", 1, "string" },
+                    { new Guid("e4fefe5f-45f1-49ed-85c9-7c13f8b06d7c"), "erzhan@mail.com", "473287f8298dba7163a897908958f7c0eae733e25d2e027992ea2edc9bed2fa8", 2, "qwerty" }
                 });
 
             migrationBuilder.InsertData(
                 table: "Postes",
                 columns: new[] { "Id", "DateCreated", "DeadLine", "DisLikes", "IsPrivate", "Likes", "Title", "Url", "UserId" },
-                values: new object[] { new Guid("54cb59a4-f970-43e8-9a83-3918f7e892c1"), new DateTime(2023, 10, 29, 21, 39, 41, 200, DateTimeKind.Local).AddTicks(8949), new DateTime(2023, 11, 29, 21, 39, 41, 200, DateTimeKind.Local).AddTicks(8967), 13L, false, 183L, "My day", "https://www.youtube.com/", new Guid("3c53c069-0cc3-4e14-915f-33547ed41d99") });
+                values: new object[] { new Guid("6a8274c8-b927-40c9-86a9-486dafe8f80f"), new DateTime(2023, 10, 31, 13, 58, 27, 970, DateTimeKind.Local).AddTicks(4953), new DateTime(2023, 11, 30, 13, 58, 27, 970, DateTimeKind.Local).AddTicks(4968), 13L, false, 183L, "My day", "https://www.youtube.com/", new Guid("d2638162-bce7-4feb-a23a-c911c8f6e6a1") });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Postes_UserId",
