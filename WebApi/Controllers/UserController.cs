@@ -1,5 +1,6 @@
 ﻿using Application.Features.Users.Delete;
 using Application.Features.Users.Get;
+using Application.Features.Users.Update;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -61,5 +62,58 @@ namespace WebApi.Controllers
 
             return BadRequest(result.Reasons);
         }
+
+        [HttpGet("getAll")]
+        public async Task<IActionResult> GetAll()
+        {
+            var request = new GetAllRequest();
+
+            var result = await _mediator.Send(request);
+   
+                return Ok(result);
+        }
+
+        [HttpPatch]
+        public async Task<IActionResult> UpdateById(Guid id, string? username, string? password, string? email, int userRole)
+        {
+            var request = new UpdateUserByIdCommand 
+            {
+                Id = id,
+                Username = username,
+                Password = password,
+                Email = email,
+                UserRole = userRole,
+            };
+
+            var result = await _mediator.Send(request);
+
+            if (result.IsSuccess)
+                return Ok(result.Value);
+
+            return BadRequest(result.Reasons);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateCurrentUser(string? username, string? password, string? email)
+        {
+            var currentUser = HttpContext.User;
+            var userId = Helper.GetCurrentUserId(currentUser);
+            var request = new UpdateUserByIdCommand
+            {
+                Id = userId,
+                Username = username,
+                Password = password,
+                Email = email,
+                UserRole = 1,
+            };
+
+            var result = await _mediator.Send(request);
+
+            if (result.IsSuccess)
+                return Ok(result.Value);
+
+            return BadRequest(result.Reasons);
+        }
     }
 }
+

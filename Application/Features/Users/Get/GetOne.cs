@@ -36,7 +36,6 @@ public class GetOneUserRequestHandler : IRequestHandler<GetOneUserRequest, Resul
         { 
             Id = request.Id,
             Email = user.Email,
-            Password = user.Password,
             Username = user.Username,
             Role = user.Role,
         };

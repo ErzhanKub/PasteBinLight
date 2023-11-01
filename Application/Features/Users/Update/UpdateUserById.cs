@@ -1,4 +1,5 @@
 ﻿using Application.Shared;
+using Domain.Enums;
 using Domain.Repositories;
 
 namespace Application.Features.Users.Update;
@@ -9,15 +10,17 @@ public record UpdateUserByIdCommand : IRequest<Result<UpdateUserByIdDto>>
     public string? Username { get; init; }
     public string? Password { get; init; }
     public string? Email { get; init; }
+    public int UserRole { get; init; }
 }
 
-public class UpdateUserByIdValidator : AbstractValidator<UpdateUserByIdDto>
+public class UpdateUserByIdValidator : AbstractValidator<UpdateUserByIdCommand>
 {
     public UpdateUserByIdValidator()
     {
-        RuleFor(u => u.Username).NotEmpty().Length(2, 200);
-        RuleFor(p => p.Password).NotEmpty().Length(5, 200);
-        RuleFor(e => e.Email).EmailAddress().NotEmpty();
+        RuleFor(u => u.Username).Length(2, 200);
+        RuleFor(p => p.Password).Length(5, 200);
+        RuleFor(e => e.Email).EmailAddress();
+        RuleFor(r => r.UserRole).ExclusiveBetween(0, 3);
     }
 }
 
@@ -44,6 +47,7 @@ public class UpdateUserByIdCommandHandler : IRequestHandler<UpdateUserByIdComman
             user.Password = request.Password;
         if (request.Email != null)
             user.Email = request.Email;
+        user.Role = (Role)request.UserRole;
 
         _userRepository.Update(user);
 
@@ -52,7 +56,6 @@ public class UpdateUserByIdCommandHandler : IRequestHandler<UpdateUserByIdComman
         var response = new UpdateUserByIdDto
         {
             Email = user.Email,
-            Password = user.Password,
             Id = user.Id,
             Username = user.Username,
             Role = user.Role,
