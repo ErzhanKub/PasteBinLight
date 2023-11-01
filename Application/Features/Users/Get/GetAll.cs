@@ -12,7 +12,7 @@ public class GetAllRequestHandler : IRequestHandler<GetAllRequest, List<UserDto>
 
     public GetAllRequestHandler(IUserRepository userRepository)
     {
-        _userRepository = userRepository;
+        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
     }
 
     public async Task<List<UserDto>> Handle(GetAllRequest request, CancellationToken cancellationToken)

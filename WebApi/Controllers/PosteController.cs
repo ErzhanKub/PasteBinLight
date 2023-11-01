@@ -1,7 +1,6 @@
 ﻿using Application.Features.Postes.Create;
 using Application.Features.Postes.Delete;
-using Application.Features.Postes.Get.GetAll;
-using Application.Features.Postes.Get.GetOne;
+using Application.Features.Postes.Get;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

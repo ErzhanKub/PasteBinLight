@@ -1,7 +1,7 @@
 ﻿using Application.Contracts;
 using Domain.Repositories;
 
-namespace Application.Features.Postes.Get.GetOne
+namespace Application.Features.Postes.Get
 {
     public class GetOnePosteByUrlRequest : IRequest<Result<PosteDto>>
     {
@@ -30,13 +30,12 @@ namespace Application.Features.Postes.Get.GetOne
             var posteId = _posteRepository.GetDecodedGuid(request.EncodedGuid!);
 
             var poste = await _posteRepository.GetByIdAsync(posteId);
+
             if (poste == null)
                 return Result.Fail("Poste not found");
 
             if (poste.IsPrivate && poste.UserId != request.UserId)
-            {
                 return Result.Fail<PosteDto>("Access denied");
-            }
 
 
             var text = await _posteRepository.GetTextFromCloudAsync(poste.Url);
