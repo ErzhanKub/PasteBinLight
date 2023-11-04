@@ -1,6 +1,6 @@
 ﻿using Domain.Enums;
 
-namespace Application.Features.Users.Update;
+namespace Application.Contracts;
 
 public record UpdateUserByIdDto
 {

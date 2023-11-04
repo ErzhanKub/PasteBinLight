@@ -28,8 +28,8 @@ namespace Application.Features.Users.Login
 
         public LoginHandler(IConfiguration configuration, IUserRepository userRepository)
         {
-            _configuration = configuration;
-            _userRepository = userRepository;
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
         public async Task<Result<string>> Handle(LoginRequest request, CancellationToken cancellationToken)
@@ -41,11 +41,12 @@ namespace Application.Features.Users.Login
             var claims = new List<Claim>
             {
                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-               new Claim(ClaimTypes.Name, user.Username),
-               new Claim(ClaimTypes.Email, user.Email),
+               new Claim(ClaimTypes.Name, user.Username.Value),
+               new Claim(ClaimTypes.Email, user.Email.Value),
                new Claim(ClaimTypes.Role, user.Role.ToString())
             };
-            var tokenString = GetTokenString(claims, DateTime.UtcNow.AddMinutes(30));
+            var tokenString = GetTokenString(claims, DateTime.UtcNow.AddHours(1));
+
             return Result.Ok(tokenString);
         }
 

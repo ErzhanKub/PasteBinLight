@@ -1,9 +1,9 @@
-﻿using Domain.Entities;
-using Domain.Repositories;
+﻿using Domain.Repositories;
 using Infrastructure.DataBase;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using System.Security.Cryptography;
+using Domain.Entities;
 
 namespace Infrastructure.Repositories
 {
@@ -20,15 +20,18 @@ namespace Infrastructure.Repositories
         {
             var hashedPassword = HashPassword(password);
 
-            var user = await _dbcontext.Users
-                .FirstOrDefaultAsync(u => u.Username == username && u.Password == hashedPassword);
+            //Могут возникнуть проблемы с производительностью!
+            var users = await _dbcontext.Users.ToListAsync();
+
+            var user = users.FirstOrDefault(u => u.Username.Value == username && u.Password.Value == hashedPassword);
 
             return user;
         }
 
+
         public async Task<Guid> CreateAsync(User entity)
         {
-            entity.Password = HashPassword(entity.Password);
+            entity.UpdatePassword(HashPassword(entity.Password.Value));
             await _dbcontext.Users.AddAsync(entity);
             return entity.Id;
         }
@@ -40,7 +43,7 @@ namespace Infrastructure.Repositories
             return Task.FromResult(ids);
         }
 
-        public async Task<List<User>> GetAllAsync()
+        public async Task<IReadOnlyList<User>> GetAllAsync()
         {
             return await _dbcontext.Users.AsNoTracking().ToListAsync();
         }

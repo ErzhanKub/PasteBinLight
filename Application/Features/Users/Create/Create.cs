@@ -4,7 +4,7 @@ using Domain.Repositories;
 
 namespace Application.Features.Users.Create
 {
-    public class CreateUserCommand : IRequest<Result<Guid>>
+    public record CreateUserCommand : IRequest<Result<Guid>>
     {
         public required string Username { get; init; }
         public required string Password { get; init; }
@@ -15,8 +15,8 @@ namespace Application.Features.Users.Create
     {
         public CreateUserCommandValidator()
         {
-            RuleFor(c => c.Username).NotEmpty().Length(1, 200);
-            RuleFor(c => c.Password).NotEmpty().Length(1, 200);
+            RuleFor(c => c.Username).NotEmpty().Length(0, 200);
+            RuleFor(c => c.Password).NotEmpty().Length(0, 200);
             RuleFor(c => c.Email).NotEmpty().EmailAddress();
         }
     }
@@ -34,16 +34,13 @@ namespace Application.Features.Users.Create
 
         public async Task<Result<Guid>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
-            var user = new User
-            {
-                Id = Guid.NewGuid(),
-                Username = request.Username,
-                Password = request.Password,
-                Email = request.Email,
-                Role = Domain.Enums.Role.User,
-            };
+            var user = User.Create(new Username(request.Username),
+                new Password(request.Password),
+                new Email(request.Email),
+                Domain.Enums.Role.User);
 
             await _userRepository.CreateAsync(user);
+
             await _unitOfWork.SaveCommitAsync();
 
             return Result.Ok(user.Id);

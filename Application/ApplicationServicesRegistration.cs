@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Application
 {
-    public static class ConfigServices
+    public static class ApplicationServicesRegistration
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {

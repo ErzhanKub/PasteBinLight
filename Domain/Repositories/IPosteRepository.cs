@@ -3,7 +3,7 @@ using Domain.Shared;
 
 namespace Domain.Repositories
 {
-    public interface IPosteRepository : IRepository<Poste>
+    public interface IPosteRepository : IGenericRepository<Poste>
     {
         public Task<string> UploadTextToCloudAsync(string objectKey, string text);
         public Task<string> GetTextFromCloudAsync(Uri url);

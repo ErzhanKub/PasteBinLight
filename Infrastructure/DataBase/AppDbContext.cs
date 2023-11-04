@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using Domain.Enums;
+using System.Text;
+using System.Security.Cryptography;
 
 namespace Infrastructure.DataBase
 {
@@ -14,6 +16,24 @@ namespace Infrastructure.DataBase
         {
             ConfigureIndexes(modelBuilder);
             SeedData(modelBuilder);
+
+            modelBuilder.Entity<User>()
+                .Property(u => u.Username)
+                .HasConversion(
+                    u => u.Value,
+                    u => new Username(u));
+
+            modelBuilder.Entity<User>()
+                .Property(u => u.Password)
+                .HasConversion(
+                    p => p.Value,
+                    p => new Password(p));
+
+            modelBuilder.Entity<User>()
+                .Property(u => u.Email)
+                .HasConversion(
+                    e => e.Value,
+                    e => new Email(e));
         }
 
         private void ConfigureIndexes(ModelBuilder modelBuilder)
@@ -31,23 +51,11 @@ namespace Infrastructure.DataBase
         private void SeedData(ModelBuilder modelBuilder)
         {
             var userId = Guid.NewGuid();
-            var adminId = Guid.NewGuid();
-            var user = new User
-            {
-                Id = userId,
-                Username = "string",
-                Password = "473287f8298dba7163a897908958f7c0eae733e25d2e027992ea2edc9bed2fa8",
-                Email = "string@mail.com",
-                Role = Role.User,
-            };
-            var admin = new User
-            {
-                Id = adminId,
-                Username = "qwerty",
-                Password = "473287f8298dba7163a897908958f7c0eae733e25d2e027992ea2edc9bed2fa8",
-                Email = "erzhan@mail.com",
-                Role = Role.Admin,
-            };
+            var user = User.Create(new Username("SuperAdmin2077CP"),
+                new Password(HashPassword("qwerty28042002")),
+                new Email("string@mail.com"),
+                Role.Admin);
+
 
             var posteId = Guid.NewGuid();
             var poste = new Poste
@@ -64,8 +72,14 @@ namespace Infrastructure.DataBase
             };
 
             modelBuilder.Entity<User>().HasData(user);
-            modelBuilder.Entity<User>().HasData(admin);
             modelBuilder.Entity<Poste>().HasData(poste);
+        }
+
+        private string HashPassword(string password)
+        {
+            var hashedBytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
+            var hash = BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
+            return hash;
         }
     }
 }

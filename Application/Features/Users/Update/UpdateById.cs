@@ -1,4 +1,5 @@
-﻿using Application.Shared;
+﻿using Application.Contracts;
+using Application.Shared;
 using Domain.Enums;
 using Domain.Repositories;
 
@@ -41,13 +42,17 @@ public class UpdateUserByIdCommandHandler : IRequestHandler<UpdateUserByIdComman
 
         if (user == null)
             return Result.Fail("User is not found");
-        if (request.Username != null)
-            user.Username = request.Username;
-        if (request.Password != null)
-            user.Password = request.Password;
-        if (request.Email != null)
-            user.Email = request.Email;
-        user.Role = (Role)request.UserRole;
+
+        if (request.Username is not null)
+            user.UpdateUsername(request.Username);
+
+        if (request.Password is not null)
+            user.UpdatePassword(request.Password);
+
+        if (request.Email is not null)
+            user.UpdateEmail(request.Email);
+
+        user.UpdateRole((Role)request.UserRole);
 
         _userRepository.Update(user);
 
@@ -55,12 +60,13 @@ public class UpdateUserByIdCommandHandler : IRequestHandler<UpdateUserByIdComman
 
         var response = new UpdateUserByIdDto
         {
-            Email = user.Email,
+            Email = user.Email.Value,
             Id = user.Id,
-            Username = user.Username,
+            Username = user.Username.Value,
             Role = user.Role,
         };
 
         return Result.Ok(response);
     }
+
 }

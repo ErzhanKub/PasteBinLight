@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure
 {
-    public static class ConfigServises
+    public static class InfrastructureServicesRegistration
     {
         public static IServiceCollection AddInfrastruct(this IServiceCollection services, IConfiguration configuration)
         {

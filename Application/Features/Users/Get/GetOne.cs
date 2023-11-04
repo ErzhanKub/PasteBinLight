@@ -29,14 +29,14 @@ public class GetOneUserRequestHandler : IRequestHandler<GetOneUserRequest, Resul
     {
         var user = await _userRepository.GetByIdAsync(request.Id);
 
-        if (user == null)
+        if (user is null)
             return Result.Fail<UserDto>("User not found");
 
         var response = new UserDto
         { 
             Id = request.Id,
-            Email = user.Email,
-            Username = user.Username,
+            Email = user.Email.Value,
+            Username = user.Username.Value,
             Role = user.Role,
         };
         

@@ -5,6 +5,7 @@ using Domain.Repositories;
 using Amazon;
 using Infrastructure.DataBase;
 using Microsoft.EntityFrameworkCore;
+using Domain.Shared;
 
 namespace Infrastructure.Repositories
 {
@@ -43,11 +44,6 @@ namespace Infrastructure.Repositories
             var posteToDelete = _dbcontext.Postes.Where(p => ids.Contains(p.Id));
             _dbcontext.Postes.RemoveRange(posteToDelete);
             return Task.FromResult(ids);
-        }
-
-        public Task<List<Poste>> GetAllAsync()
-        {
-            return _dbcontext.Postes.AsNoTracking().ToListAsync();
         }
 
         public async Task<Poste?> GetByIdAsync(Guid id)
@@ -127,6 +123,11 @@ namespace Infrastructure.Repositories
                 ContentBody = text
             };
             await client.PutObjectAsync(request);
+        }
+
+        public async Task<IReadOnlyList<Poste>> GetAllAsync()
+        {
+            return await _dbcontext.Postes.AsNoTracking().ToListAsync();
         }
     }
 }

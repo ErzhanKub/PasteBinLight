@@ -19,7 +19,7 @@ namespace Application.Features.Postes.Create
         {
             RuleFor(u => u.UserId).NotEmpty();
             RuleFor(t => t.Text).NotEmpty();
-            RuleFor(t => t.Title).Length(1,200);
+            RuleFor(t => t.Title).Length(1, 200);
             RuleFor(d => d.DeadLine).GreaterThanOrEqualTo(DateTime.Now);
         }
     }
@@ -58,7 +58,7 @@ namespace Application.Features.Postes.Create
                 UserId = user.Id,
             };
 
-            user.Postes!.Add(poste);
+            user.AddPoste(poste);
 
             var guid = await _posteRepository.CreateAsync(poste);
             _userRepository.Update(user);

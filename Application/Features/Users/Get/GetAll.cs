@@ -4,9 +4,9 @@ using Mapster;
 
 namespace Application.Features.Users.Get;
 
-public record GetAllRequest : IRequest<List<UserDto>> { }
+public record GetAllRequest : IRequest<IReadOnlyList<UserDto>> { }
 
-public class GetAllRequestHandler : IRequestHandler<GetAllRequest, List<UserDto>>
+public class GetAllRequestHandler : IRequestHandler<GetAllRequest, IReadOnlyList<UserDto>>
 {
     private readonly IUserRepository _userRepository;
 
@@ -15,11 +15,23 @@ public class GetAllRequestHandler : IRequestHandler<GetAllRequest, List<UserDto>
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
     }
 
-    public async Task<List<UserDto>> Handle(GetAllRequest request, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<UserDto>> Handle(GetAllRequest request, CancellationToken cancellationToken)
     {
         var users = await _userRepository.GetAllAsync();
 
-        var response = users.Adapt<List<UserDto>>();
+        var response = new List<UserDto>();
+
+        foreach (var user in users)
+        {
+            var result = new UserDto
+            {
+                Id = user.Id,
+                Username = user.Username.Value,
+                Email = user.Email.Value,
+                Role = user.Role
+            };
+            response.Add(result);
+        }
 
         return response;
     }

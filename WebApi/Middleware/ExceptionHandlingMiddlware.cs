@@ -23,12 +23,12 @@ namespace WebApi.Middlewere
             catch (Exception ex)
             {
                 await HandleExeptionAsync(httpContext, ex.Message,
-                      HttpStatusCode.InternalServerError, "MiddlewereErrorHandler");
+                      HttpStatusCode.InternalServerError);
             }
         }
 
         private async Task HandleExeptionAsync(HttpContext context,
-            string exMassage, HttpStatusCode httpStatusCode, string massage)
+            string exMassage, HttpStatusCode httpStatusCode)
         {
             _logger.LogError(exMassage);
 
@@ -38,7 +38,7 @@ namespace WebApi.Middlewere
 
             ErrorDto errorDto = new()
             {
-                Message = massage,
+                Message = exMassage,
                 StatusCode = (int)httpStatusCode,
             };
 
