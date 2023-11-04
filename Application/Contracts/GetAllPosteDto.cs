@@ -3,10 +3,11 @@ namespace Application.Contracts
 {
     public class GetAllPosteDto
     {
-        public Guid Id { get; set; }
-        public string? Title { get; set; }
-        public DateTime DateCreated { get; set; }
-        public long Likes { get; set; }
-        public long DisLikes { get; set; }
+        public Guid Id { get; init; }
+        public Guid UserId { get; init; }
+        public string? Title { get; init; }
+        public DateTime DateCreated { get; init; }
+        public long Likes { get; init; }
+        public long DisLikes { get; init; }
     }
 }

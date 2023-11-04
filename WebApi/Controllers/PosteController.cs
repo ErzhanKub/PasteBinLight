@@ -4,7 +4,6 @@ using Application.Features.Postes.Get;
 using Application.Features.Postes.Update;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace WebApi.Controllers
 {
@@ -62,10 +61,24 @@ namespace WebApi.Controllers
             return BadRequest(result.Reasons);
         }
 
-        [HttpGet("getAll")]
+        [HttpGet("allForAdmin")]
         public async Task<IActionResult> GetAll()
         {
             var request = new GetAllPosteRequest();
+            var result = await _mediator.Send(request);
+
+            if (result.IsSuccess) return Ok(result.Value);
+            return BadRequest(result.Reasons);
+        }
+
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllForUser()
+        {
+            var user = HttpContext.User;
+            var userId = Helper.GetCurrentUserId(user);
+
+            var request = new GetAllPostsForUserRequest() { UserId = userId};   
+
             var result = await _mediator.Send(request);
 
             if (result.IsSuccess) return Ok(result.Value);
@@ -76,11 +89,11 @@ namespace WebApi.Controllers
         public async Task<IActionResult> Update(Guid posteId, string? title, DateTime deadline , string? text, bool isPrivate)
         {
             var user = HttpContext.User;
-            var userid = Helper.GetCurrentUserId(user);
+            var userId = Helper.GetCurrentUserId(user);
 
             var request = new UpdatePosteByIdCommand
             {
-                UserId = userid,
+                UserId = userId,
                 PosteId = posteId,
                 Title = title,
                 DeadLine = deadline,
