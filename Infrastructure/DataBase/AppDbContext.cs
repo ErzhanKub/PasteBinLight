@@ -53,7 +53,8 @@ namespace Infrastructure.DataBase
             var user = User.Create(new Username("SuperAdmin2077CP"),
                 new Password(HashPassword("qwerty28042002")),
                 new Email("string@mail.com", true),
-                Role.Admin);
+                Role.Admin,
+                "ConfirmToken");
 
             var poste = new Poste
             {

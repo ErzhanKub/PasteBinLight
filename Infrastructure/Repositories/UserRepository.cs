@@ -65,31 +65,46 @@ namespace Infrastructure.Repositories
         public async Task SendEmail(string userEmail, string token)
         {
             var client = new HttpClient();
-
-            client.DefaultRequestHeaders.Add("api-key", apiKey);
-            client.DefaultRequestHeaders.Add("content-type", "application/json");
-
-            var body = new
+            var request = new HttpRequestMessage
             {
-                email = userEmail,
-                subject = "Email confirmation",
-                text = $"Thank you for registering! " +
-                $"Please confirm your email by clicking on the following link: https://localhost/confirm?token={token}"
+                Method = HttpMethod.Post,
+                RequestUri = new Uri("https://api.brevo.com/v3/smtp/email"),
+                Headers =
+                {       
+                    { "accept", "application/json" },
+                    { "api-key", apiKey },
+                },
+                Content = new StringContent(JsonConvert.SerializeObject(new
+                {
+                    sender = new { name = "ErzhanKub", email = "avazov.erjan@gmail.com" },
+                    to = new[] { new { email = userEmail } },
+                    subject = "Email confirmation",
+                    textContent = $"Thank you for registering! Please confirm your email by clicking on the following link: https://localhost:7056/api/User/{token}"
+                }), Encoding.UTF8, "application/json")
             };
 
-            var content = new StringContent(JsonConvert.SerializeObject(body),
-                Encoding.UTF8, "application/json");
-            var response = await client.PostAsync("https://api.brevo.com/v3/smtp/email", content);
-
-            if (!response.IsSuccessStatusCode)
+            using (var response = await client.SendAsync(request))
             {
-                throw new Exception($"Failed to send email: {response.StatusCode}");
+                response.EnsureSuccessStatusCode();
+                var body = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(body);
             }
         }
+
+
 
         public void Update(User entity)
         {
             _dbcontext.Users.Update(entity);
+        }
+
+        public string GenerateEmailConfirmationToken()
+        {
+            using var rng = new RNGCryptoServiceProvider();
+            byte[] tokenData = new byte[32];
+            rng.GetBytes(tokenData);
+
+            return Convert.ToBase64String(tokenData);
         }
     }
 }

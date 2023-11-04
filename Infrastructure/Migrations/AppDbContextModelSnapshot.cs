@@ -62,15 +62,15 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("3300f7e7-415a-4359-8319-9dd2d2bc0c42"),
-                            DateCreated = new DateTime(2023, 11, 4, 17, 41, 31, 72, DateTimeKind.Local).AddTicks(9156),
-                            DeadLine = new DateTime(2023, 12, 4, 17, 41, 31, 72, DateTimeKind.Local).AddTicks(9168),
+                            Id = new Guid("ed6019a8-2713-41f7-b4da-c94e1c5d8886"),
+                            DateCreated = new DateTime(2023, 11, 4, 18, 54, 34, 612, DateTimeKind.Local).AddTicks(1492),
+                            DeadLine = new DateTime(2023, 12, 4, 18, 54, 34, 612, DateTimeKind.Local).AddTicks(1504),
                             DisLikes = 13L,
                             IsPrivate = false,
                             Likes = 183L,
                             Title = "My day",
                             Url = "https://www.youtube.com/",
-                            UserId = new Guid("905536f1-a44a-41b9-8406-de4a76ec7477")
+                            UserId = new Guid("8be5a326-69e8-432d-b0cb-8b3a1814b2ee")
                         });
                 });
 
@@ -79,6 +79,10 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConfirmationToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -105,7 +109,8 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("905536f1-a44a-41b9-8406-de4a76ec7477"),
+                            Id = new Guid("8be5a326-69e8-432d-b0cb-8b3a1814b2ee"),
+                            ConfirmationToken = "ConfirmToken",
                             Email = "string@mail.com",
                             Password = "b4923143305b8c19f5c5031c406be92b99ce221e00c795598356d9fc0fc117bc",
                             Role = 2,

@@ -1,4 +1,5 @@
-﻿using Application.Features.Users.Delete;
+﻿using Application.Features.Users;
+using Application.Features.Users.Delete;
 using Application.Features.Users.Get;
 using Application.Features.Users.Update;
 using MediatR;
@@ -39,7 +40,7 @@ namespace WebApi.Controllers
 
             var command = new DeleteUsersByIdsCommand()
             {
-                Id = new Guid[] {currentUserId},
+                Id = new Guid[] { currentUserId },
             };
 
             var result = await _mediator.Send(command);
@@ -69,14 +70,14 @@ namespace WebApi.Controllers
             var request = new GetAllRequest();
 
             var result = await _mediator.Send(request);
-   
-                return Ok(result);
+
+            return Ok(result);
         }
 
         [HttpPatch]
         public async Task<IActionResult> UpdateById(Guid id, string? username, string? password, string? email, int userRole)
         {
-            var request = new UpdateUserByIdCommand 
+            var request = new UpdateUserByIdCommand
             {
                 Id = id,
                 Username = username,
@@ -89,7 +90,6 @@ namespace WebApi.Controllers
 
             if (result.IsSuccess)
                 return Ok(result.Value);
-
             return BadRequest(result.Reasons);
         }
 
@@ -112,6 +112,24 @@ namespace WebApi.Controllers
             if (result.IsSuccess)
                 return Ok(result.Value);
 
+            return BadRequest(result.Reasons);
+        }
+
+        [HttpPatch("{confirmToken}")]
+        public async Task<IActionResult> ConfirmEmail(string confirmToken)
+        {
+            var currentUser = HttpContext.User;
+            var userId = Helper.GetCurrentUserId(currentUser);
+
+            var command = new ConfirmEmailCommand
+            {
+                UserId = userId,
+                ConfirmToken = confirmToken
+            };
+
+            var result = await _mediator.Send(command);
+            if (result.IsSuccess)
+                return Ok("Mail confirmed");
             return BadRequest(result.Reasons);
         }
     }

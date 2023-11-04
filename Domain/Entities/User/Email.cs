@@ -24,6 +24,6 @@ namespace Domain.Entities
         }
 
         public string Value { get; }
-        public bool EmailConfirmed { get; } = false;
+        public bool EmailConfirmed { get; set; } = false;
     }
 }

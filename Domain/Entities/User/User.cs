@@ -6,28 +6,29 @@ namespace Domain.Entities
 {
     public sealed class User : BaseEntity
     {
-        private User():base(Guid.NewGuid()) { }
+        private User() : base(Guid.NewGuid()) { }
         private User(Guid id, Username username, Password password,
-            Email email, Role role) : base(id)
+            Email email, Role role, string confirmationToken) : base(id)
         {
             Username = username;
             Password = password;
             Email = email;
             Role = role;
             Postes = new ReadOnlyCollection<Poste>(new List<Poste>());
+            ConfirmationToken = confirmationToken;
         }
 
         public Username Username { get; private set; }
         public Password Password { get; private set; }
         public Email Email { get; private set; }
         public Role Role { get; private set; }
-
+        public string ConfirmationToken { get; private set; }
         public ICollection<Poste> Postes { get; private set; } = new List<Poste>();
 
         public static User Create(Username name, Password password,
-            Email email, Role role)
+            Email email, Role role, string confirmationToken)
         {
-            var user = new User(Guid.NewGuid(), name, password, email, role);
+            var user = new User(Guid.NewGuid(), name, password, email, role, confirmationToken);
             user.Raise(new UserCreatedDomainEvent(user.Id));
             return user;
         }

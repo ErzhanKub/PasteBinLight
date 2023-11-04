@@ -1,7 +1,6 @@
 ﻿using Application.Shared;
 using Domain.Entities;
 using Domain.Repositories;
-using Microsoft.Extensions.Configuration;
 
 namespace Application.Features.Users.Create
 {
@@ -26,25 +25,26 @@ namespace Application.Features.Users.Create
     {
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IConfiguration _configuration;
 
-        public CreateUserCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, IConfiguration configuration)
+        public CreateUserCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            _configuration = configuration;
         }
 
         public async Task<Result<Guid>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
+            var token = _userRepository.GenerateEmailConfirmationToken();
+
             var user = User.Create(new Username(request.Username),
                 new Password(request.Password),
                 new Email(request.Email, false),
-                Domain.Enums.Role.User);
+                Domain.Enums.Role.User,
+                token);
 
             await _userRepository.CreateAsync(user);
 
-            //_userRepository.SendEmail(user.Email.Value,);
+            await _userRepository.SendEmail(user.Email.Value, token);
 
             await _unitOfWork.SaveCommitAsync();
 
