@@ -1,16 +1,17 @@
-﻿using Domain.Entities;
-using Domain.Repositories;
+﻿using Domain.Repositories;
 using Infrastructure.DataBase;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using System.Security.Cryptography;
+using Domain.Entities;
+using Newtonsoft.Json;
 
 namespace Infrastructure.Repositories
 {
     public class UserRepository : IUserRepository
     {
         private readonly AppDbContext _dbcontext;
-
+        private const string apiKey = "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";
         public UserRepository(AppDbContext dbcontext)
         {
             _dbcontext = dbcontext;
@@ -20,15 +21,18 @@ namespace Infrastructure.Repositories
         {
             var hashedPassword = HashPassword(password);
 
-            var user = await _dbcontext.Users
-                .FirstOrDefaultAsync(u => u.Username == username && u.Password == hashedPassword);
+            //Могут возникнуть проблемы с производительностью!
+            var users = await _dbcontext.Users.ToListAsync();
+
+            var user = users.FirstOrDefault(u => u.Username.Value == username && u.Password.Value == hashedPassword);
 
             return user;
         }
 
+
         public async Task<Guid> CreateAsync(User entity)
         {
-            entity.Password = HashPassword(entity.Password);
+            entity.UpdatePassword(HashPassword(entity.Password.Value));
             await _dbcontext.Users.AddAsync(entity);
             return entity.Id;
         }
@@ -40,7 +44,7 @@ namespace Infrastructure.Repositories
             return Task.FromResult(ids);
         }
 
-        public async Task<List<User>> GetAllAsync()
+        public async Task<IReadOnlyList<User>> GetAllAsync()
         {
             return await _dbcontext.Users.AsNoTracking().ToListAsync();
         }
@@ -56,6 +60,31 @@ namespace Infrastructure.Repositories
             var hashedBytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
             var hash = BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
             return hash;
+        }
+
+        public async Task SendEmail(string userEmail, string token)
+        {
+            var client = new HttpClient();
+
+            client.DefaultRequestHeaders.Add("api-key", apiKey);
+            client.DefaultRequestHeaders.Add("content-type", "application/json");
+
+            var body = new
+            {
+                email = userEmail,
+                subject = "Email confirmation",
+                text = $"Thank you for registering! " +
+                $"Please confirm your email by clicking on the following link: https://localhost/confirm?token={token}"
+            };
+
+            var content = new StringContent(JsonConvert.SerializeObject(body),
+                Encoding.UTF8, "application/json");
+            var response = await client.PostAsync("https://api.brevo.com/v3/smtp/email", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"Failed to send email: {response.StatusCode}");
+            }
         }
 
         public void Update(User entity)

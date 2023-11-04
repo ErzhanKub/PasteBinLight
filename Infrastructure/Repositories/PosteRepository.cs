@@ -27,7 +27,7 @@ namespace Infrastructure.Repositories
             return entity.Id;
         }
 
-        public async Task DeleteFileFromCloudAsync(string keyName)
+        public async Task DeleteTextFromCloudAsync(string keyName)
         {
             using var client = new AmazonS3Client(accessKey, secretKey, RegionEndpoint.EUNorth1);
             var deletedRequest = new DeleteObjectRequest
@@ -43,11 +43,6 @@ namespace Infrastructure.Repositories
             var posteToDelete = _dbcontext.Postes.Where(p => ids.Contains(p.Id));
             _dbcontext.Postes.RemoveRange(posteToDelete);
             return Task.FromResult(ids);
-        }
-
-        public Task<List<Poste>> GetAllAsync()
-        {
-            return _dbcontext.Postes.AsNoTracking().ToListAsync();
         }
 
         public async Task<Poste?> GetByIdAsync(Guid id)
@@ -105,13 +100,33 @@ namespace Infrastructure.Repositories
             };
             await client.PutObjectAsync(request);
 
-            var urlRequest = new GetPreSignedUrlRequest
+            //var urlRequest = new GetPreSignedUrlRequest
+            //{
+            //    BucketName = bucketName,
+            //    Key = objectKey,
+            //    //Expires = DateTime.UtcNow.AddDays(7),
+            //};
+            //var url = client.GetPreSignedURL(urlRequest);
+
+            var url = $"https://{bucketName}.s3.{RegionEndpoint.EUNorth1.SystemName}.amazonaws.com/{objectKey}";
+            return url;
+        }
+
+        public async Task EditTextFromCloudeAsync(string objectKey, string text)
+        {
+            using var client = new AmazonS3Client(accessKey, secretKey, RegionEndpoint.EUNorth1);
+            var request = new PutObjectRequest
             {
                 BucketName = bucketName,
                 Key = objectKey,
-                Expires = DateTime.UtcNow.AddDays(7)
+                ContentBody = text
             };
-            return client.GetPreSignedURL(urlRequest);
+            await client.PutObjectAsync(request);
+        }
+
+        public async Task<IReadOnlyList<Poste>> GetAllAsync()
+        {
+            return await _dbcontext.Postes.AsNoTracking().ToListAsync();
         }
     }
 }

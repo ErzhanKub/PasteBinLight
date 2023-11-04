@@ -1,6 +1,6 @@
 ﻿using Application.Features.Postes.Create;
 using Application.Features.Postes.Delete;
-using Application.Features.Postes.Get.GetOne;
+using Application.Features.Postes.Get;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -57,6 +57,15 @@ namespace WebApi.Controllers
             var result = await _mediator.Send(command);
             if (result.IsSuccess)
                 return Ok(result.Value);
+            return BadRequest(result.Reasons);
+        }
+
+        [HttpGet("getAll")]
+        public async Task<IActionResult> GetAll()
+        {
+            var request = new GetAllPosteRequest();
+            var result = await _mediator.Send(request);
+            if (result.IsSuccess) return Ok(result.Value);
             return BadRequest(result.Reasons);
         }
 

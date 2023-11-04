@@ -1,23 +1,27 @@
-﻿using Application.Shared;
+﻿using Application.Contracts;
+using Application.Shared;
+using Domain.Enums;
 using Domain.Repositories;
 
 namespace Application.Features.Users.Update;
 
-public class UpdateUserByIdCommand : IRequest<Result<UpdateUserByIdDto>>
+public record UpdateUserByIdCommand : IRequest<Result<UpdateUserByIdDto>>
 {
     public Guid Id { get; init; }
     public string? Username { get; init; }
     public string? Password { get; init; }
     public string? Email { get; init; }
+    public int UserRole { get; init; }
 }
 
-public class UpdateUserByIdValidator : AbstractValidator<UpdateUserByIdDto>
+public class UpdateUserByIdValidator : AbstractValidator<UpdateUserByIdCommand>
 {
     public UpdateUserByIdValidator()
     {
-        RuleFor(u => u.Username).NotEmpty().Length(2, 200);
-        RuleFor(p => p.Password).NotEmpty().Length(2, 200);
-        RuleFor(e => e.Email).EmailAddress().NotEmpty();
+        RuleFor(u => u.Username).Length(2, 200);
+        RuleFor(p => p.Password).Length(5, 200);
+        RuleFor(e => e.Email).EmailAddress();
+        RuleFor(r => r.UserRole).ExclusiveBetween(0, 3);
     }
 }
 
@@ -38,25 +42,31 @@ public class UpdateUserByIdCommandHandler : IRequestHandler<UpdateUserByIdComman
 
         if (user == null)
             return Result.Fail("User is not found");
-        if (request.Username != null)
-            user.Username = request.Username;
-        if (request.Password != null)
-            user.Password = request.Password;
-        if (request.Email != null)
-            user.Email = request.Email;
+
+        if (request.Username is not null)
+            user.UpdateUsername(request.Username);
+
+        if (request.Password is not null)
+            user.UpdatePassword(request.Password);
+
+        if (request.Email is not null)
+            user.UpdateEmail(request.Email, true);
+
+        user.UpdateRole((Role)request.UserRole);
 
         _userRepository.Update(user);
+
         await _uow.SaveCommitAsync();
 
         var response = new UpdateUserByIdDto
         {
-            Email = user.Email,
-            Password = user.Password,
+            Email = user.Email.Value,
             Id = user.Id,
-            Username = user.Username,
+            Username = user.Username.Value,
             Role = user.Role,
         };
 
         return Result.Ok(response);
     }
+
 }

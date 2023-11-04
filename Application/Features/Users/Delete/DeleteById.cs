@@ -3,7 +3,7 @@ using Domain.Repositories;
 
 namespace Application.Features.Users.Delete
 {
-    public class DeleteUsersByIdsCommand : IRequest<Result<Guid[]>>
+    public record DeleteUsersByIdsCommand : IRequest<Result<Guid[]>>
     {
         public Guid[]? Id { get; init; }
     }
@@ -31,10 +31,11 @@ namespace Application.Features.Users.Delete
         {
             var result = await _userRepository.DeleteRangeAsync(request.Id!);
 
-            if (result == null)
+            if (result is null)
                 return Result.Fail<Guid[]>("User(s) not found");
 
             await _unitOfWork.SaveCommitAsync();
+
             return Result.Ok(result);
         }
     }
