@@ -7,5 +7,6 @@ namespace Domain.Repositories
     {
         string HashPassword(string password);
         Task<User?> CheckUserCredentialsAsync(string username, string password);
+        Task SendEmail(string userEmail, string token);
     }
 }

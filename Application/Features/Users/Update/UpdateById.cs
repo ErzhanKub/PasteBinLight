@@ -50,7 +50,7 @@ public class UpdateUserByIdCommandHandler : IRequestHandler<UpdateUserByIdComman
             user.UpdatePassword(request.Password);
 
         if (request.Email is not null)
-            user.UpdateEmail(request.Email);
+            user.UpdateEmail(request.Email, true);
 
         user.UpdateRole((Role)request.UserRole);
 

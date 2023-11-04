@@ -1,8 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
-
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
 namespace Infrastructure.Migrations
 {
@@ -55,16 +54,12 @@ namespace Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "Email", "Password", "Role", "Username" },
-                values: new object[,]
-                {
-                    { new Guid("d2638162-bce7-4feb-a23a-c911c8f6e6a1"), "string@mail.com", "473287f8298dba7163a897908958f7c0eae733e25d2e027992ea2edc9bed2fa8", 1, "string" },
-                    { new Guid("e4fefe5f-45f1-49ed-85c9-7c13f8b06d7c"), "erzhan@mail.com", "473287f8298dba7163a897908958f7c0eae733e25d2e027992ea2edc9bed2fa8", 2, "qwerty" }
-                });
+                values: new object[] { new Guid("905536f1-a44a-41b9-8406-de4a76ec7477"), "string@mail.com", "b4923143305b8c19f5c5031c406be92b99ce221e00c795598356d9fc0fc117bc", 2, "SuperAdmin2077CP" });
 
             migrationBuilder.InsertData(
                 table: "Postes",
                 columns: new[] { "Id", "DateCreated", "DeadLine", "DisLikes", "IsPrivate", "Likes", "Title", "Url", "UserId" },
-                values: new object[] { new Guid("6a8274c8-b927-40c9-86a9-486dafe8f80f"), new DateTime(2023, 10, 31, 13, 58, 27, 970, DateTimeKind.Local).AddTicks(4953), new DateTime(2023, 11, 30, 13, 58, 27, 970, DateTimeKind.Local).AddTicks(4968), 13L, false, 183L, "My day", "https://www.youtube.com/", new Guid("d2638162-bce7-4feb-a23a-c911c8f6e6a1") });
+                values: new object[] { new Guid("3300f7e7-415a-4359-8319-9dd2d2bc0c42"), new DateTime(2023, 11, 4, 17, 41, 31, 72, DateTimeKind.Local).AddTicks(9156), new DateTime(2023, 12, 4, 17, 41, 31, 72, DateTimeKind.Local).AddTicks(9168), 13L, false, 183L, "My day", "https://www.youtube.com/", new Guid("905536f1-a44a-41b9-8406-de4a76ec7477") });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Postes_UserId",

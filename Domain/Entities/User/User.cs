@@ -55,9 +55,9 @@ namespace Domain.Entities
             Username = new Username(newUsername);
         }
 
-        public void UpdateEmail(string newEmail)
+        public void UpdateEmail(string newEmail, bool emailConfirmed)
         {
-            Email = new Email(newEmail);
+            Email = new Email(newEmail, emailConfirmed);
         }
 
         public void UpdateRole(Role role)

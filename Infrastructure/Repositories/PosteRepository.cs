@@ -5,7 +5,6 @@ using Domain.Repositories;
 using Amazon;
 using Infrastructure.DataBase;
 using Microsoft.EntityFrameworkCore;
-using Domain.Shared;
 
 namespace Infrastructure.Repositories
 {

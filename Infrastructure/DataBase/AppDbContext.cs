@@ -33,7 +33,7 @@ namespace Infrastructure.DataBase
                 .Property(u => u.Email)
                 .HasConversion(
                     e => e.Value,
-                    e => new Email(e));
+                    e => new Email(e, true));
         }
 
         private void ConfigureIndexes(ModelBuilder modelBuilder)
@@ -50,17 +50,14 @@ namespace Infrastructure.DataBase
 
         private void SeedData(ModelBuilder modelBuilder)
         {
-            var userId = Guid.NewGuid();
             var user = User.Create(new Username("SuperAdmin2077CP"),
                 new Password(HashPassword("qwerty28042002")),
-                new Email("string@mail.com"),
+                new Email("string@mail.com", true),
                 Role.Admin);
 
-
-            var posteId = Guid.NewGuid();
             var poste = new Poste
             {
-                Id = posteId,
+                Id = Guid.NewGuid(),
                 Title = "My day",
                 Url = new Uri("https://www.youtube.com/"),
                 DateCreated = DateTime.Now,
@@ -68,12 +65,13 @@ namespace Infrastructure.DataBase
                 Likes = 183,
                 DisLikes = 13,
                 IsPrivate = false,
-                UserId = userId,
+                UserId = user.Id,
             };
 
             modelBuilder.Entity<User>().HasData(user);
             modelBuilder.Entity<Poste>().HasData(poste);
         }
+
 
         private string HashPassword(string password)
         {

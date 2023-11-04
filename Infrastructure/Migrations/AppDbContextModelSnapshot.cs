@@ -62,15 +62,15 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("6a8274c8-b927-40c9-86a9-486dafe8f80f"),
-                            DateCreated = new DateTime(2023, 10, 31, 13, 58, 27, 970, DateTimeKind.Local).AddTicks(4953),
-                            DeadLine = new DateTime(2023, 11, 30, 13, 58, 27, 970, DateTimeKind.Local).AddTicks(4968),
+                            Id = new Guid("3300f7e7-415a-4359-8319-9dd2d2bc0c42"),
+                            DateCreated = new DateTime(2023, 11, 4, 17, 41, 31, 72, DateTimeKind.Local).AddTicks(9156),
+                            DeadLine = new DateTime(2023, 12, 4, 17, 41, 31, 72, DateTimeKind.Local).AddTicks(9168),
                             DisLikes = 13L,
                             IsPrivate = false,
                             Likes = 183L,
                             Title = "My day",
                             Url = "https://www.youtube.com/",
-                            UserId = new Guid("d2638162-bce7-4feb-a23a-c911c8f6e6a1")
+                            UserId = new Guid("905536f1-a44a-41b9-8406-de4a76ec7477")
                         });
                 });
 
@@ -105,19 +105,11 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("d2638162-bce7-4feb-a23a-c911c8f6e6a1"),
+                            Id = new Guid("905536f1-a44a-41b9-8406-de4a76ec7477"),
                             Email = "string@mail.com",
-                            Password = "473287f8298dba7163a897908958f7c0eae733e25d2e027992ea2edc9bed2fa8",
-                            Role = 1,
-                            Username = "string"
-                        },
-                        new
-                        {
-                            Id = new Guid("e4fefe5f-45f1-49ed-85c9-7c13f8b06d7c"),
-                            Email = "erzhan@mail.com",
-                            Password = "473287f8298dba7163a897908958f7c0eae733e25d2e027992ea2edc9bed2fa8",
+                            Password = "b4923143305b8c19f5c5031c406be92b99ce221e00c795598356d9fc0fc117bc",
                             Role = 2,
-                            Username = "qwerty"
+                            Username = "SuperAdmin2077CP"
                         });
                 });
 

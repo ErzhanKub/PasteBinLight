@@ -1,6 +1,5 @@
 ﻿using Application.Contracts;
 using Domain.Repositories;
-using Mapster;
 
 namespace Application.Features.Users.Get;
 
