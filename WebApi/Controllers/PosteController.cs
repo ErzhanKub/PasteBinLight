@@ -1,8 +1,10 @@
 ﻿using Application.Features.Postes.Create;
 using Application.Features.Postes.Delete;
 using Application.Features.Postes.Get;
+using Application.Features.Postes.Update;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace WebApi.Controllers
 {
@@ -65,7 +67,32 @@ namespace WebApi.Controllers
         {
             var request = new GetAllPosteRequest();
             var result = await _mediator.Send(request);
+
             if (result.IsSuccess) return Ok(result.Value);
+            return BadRequest(result.Reasons);
+        }
+
+        [HttpPatch("update")]
+        public async Task<IActionResult> Update(Guid posteId, string? title, DateTime deadline , string? text, bool isPrivate)
+        {
+            var user = HttpContext.User;
+            var userid = Helper.GetCurrentUserId(user);
+
+            var request = new UpdatePosteByIdCommand
+            {
+                UserId = userid,
+                PosteId = posteId,
+                Title = title,
+                DeadLine = deadline,
+                IsPrivate = isPrivate,
+                Text = text,
+            };
+
+            var result = await _mediator.Send(request);
+
+            if (result.IsSuccess)
+                return Ok(result.Value);
+
             return BadRequest(result.Reasons);
         }
 

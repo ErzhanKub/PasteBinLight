@@ -3,7 +3,7 @@ using Domain.Repositories;
 
 namespace Application.Features.Postes.Get
 {
-    public class GetOnePosteByUrlRequest : IRequest<Result<PosteDto>>
+    public record GetOnePosteByUrlRequest : IRequest<Result<PosteDto>>
     {
         public string? EncodedGuid { get; init; }
         public Guid UserId { get; init; }
