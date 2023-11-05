@@ -15,12 +15,10 @@ namespace Application.Features.Postes.Get
 
     public class GetAllPostsForUserHandler : IRequestHandler<GetAllPostsForUserRequest, Result<List<GetAllPosteDto>>>
     {
-        private readonly IPosteRepository _posteRepository;
         private readonly IUserRepository _userRepository;
 
-        public GetAllPostsForUserHandler(IPosteRepository posteRepository, IUserRepository userRepository)
+        public GetAllPostsForUserHandler(IUserRepository userRepository)
         {
-            _posteRepository = posteRepository ?? throw new ArgumentNullException(nameof(posteRepository));
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
@@ -30,9 +28,7 @@ namespace Application.Features.Postes.Get
             if (user is null)
                 return Result.Fail("User is not found");
 
-            var allPostes = await _posteRepository.GetAllAsync();
-
-            var response = allPostes.Where(p => p.UserId == user.Id).Select(poste => new GetAllPosteDto
+            var response = user.Postes.Select(poste => new GetAllPosteDto
             {
                 Id = user.Id,
                 DateCreated = poste.DateCreated,
