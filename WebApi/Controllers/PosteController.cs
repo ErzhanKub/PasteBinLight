@@ -1,6 +1,7 @@
 ﻿using Application.Features.Postes.Create;
 using Application.Features.Postes.Delete;
 using Application.Features.Postes.Get;
+using Application.Features.Postes.Update;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -79,6 +80,7 @@ namespace WebApi.Controllers
             _logger.LogError("Failed to delete poste: {Reasons}", result.Reasons);
             return NotFound(result.Reasons);
         }
+
 
         [HttpGet]
         public async Task<IActionResult> GetAllPostes()
