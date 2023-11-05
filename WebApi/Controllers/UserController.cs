@@ -4,6 +4,7 @@ using Application.Features.Users.Get;
 using Application.Features.Users.Update;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Web;
 
 namespace WebApi.Controllers
 {
@@ -20,7 +21,7 @@ namespace WebApi.Controllers
             _logger = logger;
         }
 
-        [HttpDelete("delete")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(DeleteUsersByIdsCommand command)
         {
             var result = await _mediator.Send(command);
@@ -28,11 +29,11 @@ namespace WebApi.Controllers
             if (result.IsSuccess)
                 return Ok(result.Value);
 
-            return BadRequest(result.Reasons);
+            return NotFound(result.Reasons);
         }
 
 
-        [HttpDelete("deleteCurrentUser")]
+        [HttpDelete("me")]
         public async Task<IActionResult> DeleteCurrentUser()
         {
             var currentUser = HttpContext.User;
@@ -48,7 +49,7 @@ namespace WebApi.Controllers
             if (result.IsSuccess)
                 return Ok(result.Value);
 
-            return BadRequest(result.Reasons);
+            return NotFound(result.Reasons);
         }
 
         [HttpGet("{id}")]
@@ -61,11 +62,11 @@ namespace WebApi.Controllers
             if (result.IsSuccess)
                 return Ok(result.Value);
 
-            return BadRequest(result.Reasons);
+            return NotFound(result.Reasons);
         }
 
-        [HttpGet("getAll")]
-        public async Task<IActionResult> GetAll()
+        [HttpGet]
+        public async Task<IActionResult> GetAllUsers()
         {
             var request = new GetAllRequest();
 
@@ -74,8 +75,8 @@ namespace WebApi.Controllers
             return Ok(result);
         }
 
-        [HttpPatch]
-        public async Task<IActionResult> UpdateById(Guid id, string? username, string? password, string? email, int userRole)
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateUserById(Guid id, string? username, string? password, string? email, int userRole)
         {
             var request = new UpdateUserByIdCommand
             {
@@ -90,10 +91,10 @@ namespace WebApi.Controllers
 
             if (result.IsSuccess)
                 return Ok(result.Value);
-            return BadRequest(result.Reasons);
+            return NotFound(result.Reasons);
         }
 
-        [HttpPut]
+        [HttpPut("me")]
         public async Task<IActionResult> UpdateCurrentUser(string? username, string? password, string? email)
         {
             var currentUser = HttpContext.User;
@@ -112,25 +113,27 @@ namespace WebApi.Controllers
             if (result.IsSuccess)
                 return Ok(result.Value);
 
-            return BadRequest(result.Reasons);
+            return NotFound(result.Reasons);
         }
 
-        [HttpPatch("{confirmToken}")]
+        [HttpPatch("confirm/{confirmToken}")]
         public async Task<IActionResult> ConfirmEmail(string confirmToken)
         {
             var currentUser = HttpContext.User;
             var userId = Helper.GetCurrentUserId(currentUser);
 
+            string decodedToken = HttpUtility.UrlDecode(confirmToken);
+
             var command = new ConfirmEmailCommand
             {
                 UserId = userId,
-                ConfirmToken = confirmToken
+                ConfirmToken = decodedToken
             };
 
             var result = await _mediator.Send(command);
             if (result.IsSuccess)
                 return Ok("Mail confirmed");
-            return BadRequest(result.Reasons);
+            return NotFound(result.Reasons);
         }
     }
 }

@@ -1,7 +1,4 @@
-﻿using Application.Shared;
-using Domain.Repositories;
-
-namespace Application.Features.Users
+﻿namespace Application.Features.Users
 {
     public record ConfirmEmailCommand : IRequest<Result>
     {
@@ -32,11 +29,15 @@ namespace Application.Features.Users
         public async Task<Result> Handle(ConfirmEmailCommand request, CancellationToken cancellationToken)
         {
             var user = await _userRepository.GetByIdAsync(request.UserId);
+
             if (user is null)
                 return Result.Fail("User not found");
 
-            if(user.ConfirmationToken == request.ConfirmToken)
+            if (user.ConfirmationToken == request.ConfirmToken)
                 user.Email.EmailConfirmed = true;
+
+            _userRepository.Update(user);
+            await _unitOfWork.SaveCommitAsync();
 
             return Result.Ok();
         }

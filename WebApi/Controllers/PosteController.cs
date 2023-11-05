@@ -19,20 +19,25 @@ namespace WebApi.Controllers
             _logger = logger;
         }
 
-        [HttpPost("create")]
-        public async Task<IActionResult> Create(CreatePosteCommand command)
+        [HttpPost]
+        public async Task<IActionResult> CreatePoste(CreatePosteCommand command)
         {
             var currentUser = HttpContext.User;
             command.UserId = Helper.GetCurrentUserId(currentUser);
 
-            var result = await _mediator.Send(command);
-            if (result.IsFailed)
-                return BadRequest(result.Reasons);
-            return Created($"/api/Poste/{result.Value}", result.Value);
+            var response = await _mediator.Send(command);
+            if (response.IsFailed)
+            {
+                _logger.LogError("Failed to create poste:{Reasons}", response.Reasons);
+                return BadRequest(response.Reasons);
+            }
+
+            _logger.LogInformation("Created poste: {Value}", response.Value);
+            return Created($"/api/Poste/{response.Value}", response.Value);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetByUrl(string encodedGuid)
+        [HttpGet("{encodedGuid}")]
+        public async Task<IActionResult> GetPoste(string encodedGuid)
         {
             var currentUser = HttpContext.User;
 
@@ -44,43 +49,49 @@ namespace WebApi.Controllers
 
             var response = await _mediator.Send(request);
             if (response.IsSuccess)
+            {
+                _logger.LogInformation("Retrieved poste: {Id}", response.Value.Id);
                 return Ok(response.Value);
-            return BadRequest(response.Reasons);
+            }
+
+            _logger.LogError("Failed to retrieve poste: {Reasons}", response.Reasons);
+            return NotFound(response.Reasons);
         }
 
-        [HttpDelete]
-        public async Task<IActionResult> Delete(DeletePosteByIdsCommand command)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePoste(Guid id)
         {
             var user = HttpContext.User;
-            command.UserId = Helper.GetCurrentUserId(user);
 
+            var command = new DeletePosteByIdsCommand
+            {
+                PosteId = id,
+                UserId = Helper.GetCurrentUserId(user)
+            };
+        
             var result = await _mediator.Send(command);
+
             if (result.IsSuccess)
+            {
+                _logger.LogInformation("Deleted poste: {Id}", command.PosteId);
                 return Ok(result.Value);
-            return BadRequest(result.Reasons);
+            }
+            _logger.LogError("Failed to delete poste: {Reasons}", result.Reasons);
+            return NotFound(result.Reasons);
         }
 
-        [HttpGet("getAll")]
-        public async Task<IActionResult> GetAll()
+        [HttpGet]
+        public async Task<IActionResult> GetAllPostes()
         {
             var request = new GetAllPosteRequest();
             var result = await _mediator.Send(request);
-            if (result.IsSuccess) return Ok(result.Value);
-            return BadRequest(result.Reasons);
-        }
-
-        private bool AccessCheck(Guid id)
-        {
-            var currentUser = HttpContext.User;
-            var userData = Helper.GetUserDetails(currentUser);
-            var isAdmin = userData.Item2 == "Admin";
-
-            if (!isAdmin && userData.Item1 != id.ToString())
+            if (result.IsSuccess)
             {
-                return false;
+                _logger.LogInformation("Retrieved all postes");
+                return Ok(result.Value);
             }
-
-            return true;
+            _logger.LogError("Failed to retrieve all postes: {Reasons}", result.Reasons);
+            return NotFound(result.Reasons);
         }
     }
 }

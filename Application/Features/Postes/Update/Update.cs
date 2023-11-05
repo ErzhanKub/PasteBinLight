@@ -1,8 +1,4 @@
-﻿using Application.Contracts;
-using Application.Shared;
-using Domain.Repositories;
-
-namespace Application.Features.Postes.Update
+﻿namespace Application.Features.Postes.Update
 {
     public class UpdatePosteByIdCommand : IRequest<Result<PosteDto>>
     {

@@ -1,7 +1,4 @@
-﻿using Application.Shared;
-using Domain.Repositories;
-
-namespace Application.Features.Postes.Delete
+﻿namespace Application.Features.Postes.Delete
 {
     public record DeletePosteByIdsCommand : IRequest<Result<Guid>>
     {

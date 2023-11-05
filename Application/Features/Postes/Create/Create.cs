@@ -1,8 +1,4 @@
-﻿using Application.Shared;
-using Domain.Entities;
-using Domain.Repositories;
-
-namespace Application.Features.Postes.Create
+﻿namespace Application.Features.Postes.Create
 {
     public record CreatePosteCommand : IRequest<Result<string>>
     {
@@ -18,7 +14,7 @@ namespace Application.Features.Postes.Create
         public CreatePosteCommandValidator()
         {
             RuleFor(u => u.UserId).NotEmpty();
-            RuleFor(t => t.Text).NotEmpty();
+            RuleFor(t => t.Text).NotEmpty().Length(1, 2000);
             RuleFor(t => t.Title).Length(1, 200);
             RuleFor(d => d.DeadLine).GreaterThanOrEqualTo(DateTime.Now);
         }
@@ -41,7 +37,7 @@ namespace Application.Features.Postes.Create
         {
             var user = await _userRepository.GetByIdAsync(request.UserId);
 
-            if (user == null)
+            if (user is null)
                 return Result.Fail("User not found");
 
             var posteId = Guid.NewGuid();

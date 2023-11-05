@@ -1,7 +1,4 @@
-﻿using Application.Contracts;
-using Domain.Repositories;
-
-namespace Application.Features.Postes.Get
+﻿namespace Application.Features.Postes.Get
 {
     public record GetAllPosteRequest : IRequest<Result<List<GetAllPosteDto>>> { }
 

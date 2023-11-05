@@ -32,7 +32,6 @@ namespace Infrastructure.Repositories
 
         public async Task<Guid> CreateAsync(User entity)
         {
-            entity.UpdatePassword(HashPassword(entity.Password.Value));
             await _dbcontext.Users.AddAsync(entity);
             return entity.Id;
         }

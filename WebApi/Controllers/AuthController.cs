@@ -1,4 +1,5 @@
-﻿using Application.Features.Users.Create;
+﻿using Application.Contracts;
+using Application.Features.Users.Create;
 using Application.Features.Users.Login;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -20,23 +21,31 @@ namespace WebApi.Controllers
         }
 
         [AllowAnonymous]
-        [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginRequest request)
-        {
-            var token = await _mediator.Send(request);
-            if (token.IsSuccess)
-                return Ok(token.Value);
-            return BadRequest(token.Reasons);
-        }
-
-        [AllowAnonymous]
-        [HttpPost("register")]
-        public async Task<IActionResult> Register(CreateUserCommand command)
+        [HttpPost("users")]
+        public async Task<IActionResult> CreateUser(CreateUserCommand command)
         {
             var result = await _mediator.Send(command);
             if (result.IsSuccess)
-                return Ok(result.Value);
+            {
+                _logger.LogInformation("Created user: {Id}", result.Value.Id);
+                return CreatedAtAction(nameof(UserDto), result.Value);
+            }
+            _logger.LogError("Failed to create user: {Reasons}", result.Reasons);
             return BadRequest(result.Reasons);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("sessions")]
+        public async Task<IActionResult> CreateSession(LoginRequest request)
+        {
+            var response = await _mediator.Send(request);
+            if (response.IsSuccess)
+            {
+                _logger.LogInformation("Created session for user: {UserId}", response.Value.UserId);
+                return Ok(response.Value.Token);
+            }
+            _logger.LogError("Failed to create session for user: {UserId}, {Reasons}", response.Value.UserId, response.Reasons);
+            return Unauthorized(response.Reasons);
         }
     }
 }

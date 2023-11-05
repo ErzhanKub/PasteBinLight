@@ -1,7 +1,4 @@
-﻿using Application.Shared;
-using Domain.Repositories;
-
-namespace Application.Features.Users.Delete
+﻿namespace Application.Features.Users.Delete
 {
     public record DeleteUsersByIdsCommand : IRequest<Result<Guid[]>>
     {
@@ -12,7 +9,13 @@ namespace Application.Features.Users.Delete
     {
         public DeleteUsersByIdsCommandValidator()
         {
-            RuleFor(i => i.Id).NotEmpty();
+            RuleFor(i => i.Id)
+                .NotEmpty()
+                .WithMessage("User Ids cannot be empty");
+
+            RuleForEach(i => i.Id)
+                .NotNull()
+                .WithMessage("User Id cannot be null");
         }
     }
 
@@ -20,23 +23,37 @@ namespace Application.Features.Users.Delete
     {
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<DeleteUsersByIdsHandler> _logger;
 
-        public DeleteUsersByIdsHandler(IUserRepository userRepository, IUnitOfWork unitOfWork)
+        public DeleteUsersByIdsHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, ILogger<DeleteUsersByIdsHandler> logger)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<Result<Guid[]>> Handle(DeleteUsersByIdsCommand request, CancellationToken cancellationToken)
         {
-            var result = await _userRepository.DeleteRangeAsync(request.Id!);
+            try
+            {
+                var result = await _userRepository.DeleteRangeAsync(request.Id!);
 
-            if (result is null)
-                return Result.Fail<Guid[]>("User(s) not found");
+                if (result is null)
+                {
+                    _logger.LogWarning("User(s) not found");
+                    return Result.Fail<Guid[]>("User(s) not found");
+                }
 
-            await _unitOfWork.SaveCommitAsync();
+                await _unitOfWork.SaveCommitAsync();
 
-            return Result.Ok(result);
+                _logger.LogInformation("Deleted users: {UserIds}", string.Join(", ", result));
+                return Result.Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while deleting users");
+                throw;
+            }
         }
     }
 }

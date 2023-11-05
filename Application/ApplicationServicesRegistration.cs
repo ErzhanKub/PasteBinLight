@@ -9,6 +9,8 @@ namespace Application
     {
         public static IServiceCollection AddApplication(this IServiceCollection services)
         {
+            services.AddLogging();
+
             services.AddMediatR(config => config.RegisterServicesFromAssemblies(
                        Assembly.GetExecutingAssembly()));
 
