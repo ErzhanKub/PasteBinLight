@@ -25,6 +25,9 @@
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<DeleteUsersByIdsHandler> _logger;
 
+        private const string UserNotFoundMessega = "User(s) not found";
+        private const string UserDeletedMessega = "Deleted users: {UserIds}";
+        private const string ErrorMessega = "Error occurred while deleting users";
         public DeleteUsersByIdsHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, ILogger<DeleteUsersByIdsHandler> logger)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
@@ -40,18 +43,18 @@
 
                 if (result is null)
                 {
-                    _logger.LogWarning("User(s) not found");
-                    return Result.Fail<Guid[]>("User(s) not found");
+                    _logger.LogWarning(UserNotFoundMessega);
+                    return Result.Fail<Guid[]>(UserNotFoundMessega);
                 }
 
                 await _unitOfWork.SaveCommitAsync();
 
-                _logger.LogInformation("Deleted users: {UserIds}", string.Join(", ", result));
+                _logger.LogInformation(UserDeletedMessega, string.Join(", ", result));
                 return Result.Ok(result);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while deleting users");
+                _logger.LogError(ex, ErrorMessega);
                 throw;
             }
         }

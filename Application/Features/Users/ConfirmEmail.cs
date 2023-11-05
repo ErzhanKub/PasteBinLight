@@ -10,8 +10,11 @@
     {
         public ConfirmEmailValidator()
         {
-            RuleFor(u => u.UserId).NotEmpty();
-            RuleFor(t => t.ConfirmToken).NotEmpty();
+            RuleFor(u => u.UserId)
+                .NotEmpty();
+            RuleFor(t => t.ConfirmToken)
+                .NotEmpty()
+                .NotNull();
         }
     }
 
@@ -19,27 +22,49 @@
     {
         private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<ConfirmEmailHandler> _logger;
 
-        public ConfirmEmailHandler(IUserRepository userRepository, IUnitOfWork unitOfWork)
+        private const string UserNotFoundMessega = "User is not found";
+        private const string EmailConfirmedMessega = "Email has been confirmed: {email}";
+        private const string ErrorMessega = "An error occurred during email confirmation";
+
+        public ConfirmEmailHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, ILogger<ConfirmEmailHandler> logger)
         {
             _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
-
         public async Task<Result> Handle(ConfirmEmailCommand request, CancellationToken cancellationToken)
         {
-            var user = await _userRepository.GetByIdAsync(request.UserId);
+            try
+            {
+                var user = await _userRepository.GetByIdAsync(request.UserId);
 
-            if (user is null)
-                return Result.Fail("User not found");
+                if (user is null)
+                {
+                    _logger.LogWarning(UserNotFoundMessega);
+                    return Result.Fail(UserNotFoundMessega);
+                }
+                    
+                if (user.ConfirmationToken != request.ConfirmToken)
+                {
+                    _logger.LogWarning("Email was not confirmed: {email}", user.Email.Value);
+                    return Result.Fail("Email was not confirmed");
+                }
 
-            if (user.ConfirmationToken == request.ConfirmToken)
                 user.Email.EmailConfirmed = true;
+                _userRepository.Update(user);
+                await _unitOfWork.SaveCommitAsync();
 
-            _userRepository.Update(user);
-            await _unitOfWork.SaveCommitAsync();
+                _logger.LogInformation(EmailConfirmedMessega, user.Email.Value);
 
-            return Result.Ok();
+                return Result.Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessega);
+                throw;
+            }
         }
     }
 }

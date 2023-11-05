@@ -35,6 +35,9 @@ public class UpdateUserByIdCommandHandler : IRequestHandler<UpdateUserByIdComman
     private readonly IUnitOfWork _uow;
     private readonly ILogger<UpdateUserByIdCommandHandler> _logger;
 
+    private const string UserNotFoundMessega = "User is not found";
+    private const string DataChanged = "User data has been changed";
+    private const string ErrorMessega = "An error occurred while changing user data";
     public UpdateUserByIdCommandHandler(IUserRepository userRepository, IUnitOfWork uow, ILogger<UpdateUserByIdCommandHandler> logger)
     {
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
@@ -50,8 +53,8 @@ public class UpdateUserByIdCommandHandler : IRequestHandler<UpdateUserByIdComman
 
             if (user == null)
             {
-                _logger.LogWarning("User is not found");
-                return Result.Fail("User is not found");
+                _logger.LogWarning(UserNotFoundMessega);
+                return Result.Fail(UserNotFoundMessega);
             }
 
             if (request.Username is not null)
@@ -69,7 +72,7 @@ public class UpdateUserByIdCommandHandler : IRequestHandler<UpdateUserByIdComman
 
             await _uow.SaveCommitAsync();
 
-            _logger.LogInformation("User data has been changed");
+            _logger.LogInformation(DataChanged);
 
             var response = new UpdateUserByIdDto
             {
@@ -83,7 +86,7 @@ public class UpdateUserByIdCommandHandler : IRequestHandler<UpdateUserByIdComman
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while changing user data");
+            _logger.LogError(ex, ErrorMessega);
             throw;
         }
     }

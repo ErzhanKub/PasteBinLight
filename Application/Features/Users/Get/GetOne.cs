@@ -18,6 +18,10 @@ public class GetOneUserRequestHandler : IRequestHandler<GetOneUserRequest, Resul
     private readonly IUserRepository _userRepository;
     private readonly ILogger<GetOneUserRequestHandler> _logger;
 
+    private const string UserNotFoundMessega = "User not found";
+    private const string UserReceivedMessega = "Received user by: {Id}";
+    private const string ErrorMessega = "An error occurred while receiving the user";
+
     public GetOneUserRequestHandler(IUserRepository userRepository, ILogger<GetOneUserRequestHandler> logger)
     {
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
@@ -32,11 +36,11 @@ public class GetOneUserRequestHandler : IRequestHandler<GetOneUserRequest, Resul
 
             if (user is null)
             {
-                _logger.LogWarning("User not found");
-                return Result.Fail<UserDto>("User not found");
+                _logger.LogWarning(UserNotFoundMessega);
+                return Result.Fail<UserDto>(UserNotFoundMessega);
             }
 
-            _logger.LogInformation("Received user by: {Id}", user.Id);
+            _logger.LogInformation(UserReceivedMessega, user.Id);
 
             var response = new UserDto
             {
@@ -50,7 +54,7 @@ public class GetOneUserRequestHandler : IRequestHandler<GetOneUserRequest, Resul
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while receiving the user");
+            _logger.LogError(ex, ErrorMessega);
             throw;
         }
     }

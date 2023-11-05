@@ -34,6 +34,10 @@ public class LoginHandler : IRequestHandler<LoginRequest, Result<LoginResponseDt
     private readonly IUserRepository _userRepository;
     private readonly ILogger<LoginHandler> _logger;
 
+    private const string InputIncorrectMessega = "Username or password is incorrect";
+    private const string ReceivedTokenMessega = "Received a token for user by Id: {Id}; Token: {tokenString}";
+    private const string ErrorMessega = "An error was received while receiving a token";
+
     public LoginHandler(IConfiguration configuration, IUserRepository userRepository, ILogger<LoginHandler> logger)
     {
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
@@ -48,8 +52,8 @@ public class LoginHandler : IRequestHandler<LoginRequest, Result<LoginResponseDt
             var user = await _userRepository.CheckUserCredentialsAsync(request.Username, request.Password);
             if (user is null)
             {
-                _logger.LogWarning("Username or password is incorrect");
-                return Result.Fail("Username or password is incorrect");
+                _logger.LogWarning(InputIncorrectMessega);
+                return Result.Fail(InputIncorrectMessega);
             }
 
             var claims = new List<Claim>
@@ -62,7 +66,7 @@ public class LoginHandler : IRequestHandler<LoginRequest, Result<LoginResponseDt
 
             var tokenString = GetTokenString(claims, DateTime.UtcNow.AddHours(1));
 
-            _logger.LogInformation("Received a token for user by Id: {Id}; Token: {tokenString}", user.Id, tokenString);
+            _logger.LogInformation(ReceivedTokenMessega, user.Id, tokenString);
 
             var response = new LoginResponseDto
             {
@@ -74,7 +78,7 @@ public class LoginHandler : IRequestHandler<LoginRequest, Result<LoginResponseDt
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error was received while receiving a token");
+            _logger.LogError(ex, ErrorMessega);
             throw;
         }
     }

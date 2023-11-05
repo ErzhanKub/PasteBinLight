@@ -34,11 +34,13 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Resul
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreateUserCommandHandler> _logger;
 
+    private const string UserCreatedMessega = "User created: {id}";
+    private const string ErrorMessega = "An error occurred while creating users";
     public CreateUserCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, ILogger<CreateUserCommandHandler> logger)
     {
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _logger = logger;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<Result<UserDto>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -56,7 +58,7 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Resul
             await _userRepository.CreateAsync(user);
             await _unitOfWork.SaveCommitAsync();
 
-            _logger.LogInformation("User created: {id}", user.Id);
+            _logger.LogInformation(UserCreatedMessega, user.Id);
 
             await _userRepository.SendEmail(user.Email.Value, token);
 
@@ -72,7 +74,7 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Resul
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while creating users");
+            _logger.LogError(ex, ErrorMessega);
             throw;
         }
     }
