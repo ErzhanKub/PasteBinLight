@@ -20,7 +20,7 @@ public class CreatePosteCommandValidator : AbstractValidator<CreatePosteCommand>
     }
 }
 
-public class CreatePosteHandler : IRequestHandler<CreatePosteCommand, Result<string>>
+public sealed class CreatePosteHandler : IRequestHandler<CreatePosteCommand, Result<string>>
 {
     private readonly IUserRepository _userRepository;
     private readonly IPosteRepository _posteRepository;
@@ -79,7 +79,6 @@ public class CreatePosteHandler : IRequestHandler<CreatePosteCommand, Result<str
             _userRepository.Update(user);
 
             await _unitOfWork.SaveCommitAsync();
-
             _logger.LogInformation(PosteSavedMessage, poste.Id, user.Id);
 
             var encodedGuid = _posteRepository.GetEncodedGuid(guid);

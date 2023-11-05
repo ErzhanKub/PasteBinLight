@@ -1,28 +1,27 @@
-﻿using System.Net;
+﻿using Microsoft.AspNetCore.Http;
+using System.Net;
 using WebApi.Dtos;
 
 namespace WebApi.Middlewere;
 
-public class ExceptionHandlingMiddlwere
+public class ExceptionHandlingMiddlwere : IMiddleware
 {
-    private readonly RequestDelegate _next;
     private readonly ILogger<ExceptionHandlingMiddlwere> _logger;
-    public ExceptionHandlingMiddlwere(RequestDelegate next,
-        ILogger<ExceptionHandlingMiddlwere> logger)
-    {
-        _next = next;
-        _logger = logger;
-    }
 
-    public async Task InvokeAsync(HttpContext httpContext)
+    public ExceptionHandlingMiddlwere(
+        ILogger<ExceptionHandlingMiddlwere> logger) =>
+        _logger = logger;
+
+
+    public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         try
         {
-            await _next(httpContext);
+            await next(context);
         }
         catch (Exception ex)
         {
-            await HandleExeptionAsync(httpContext, ex.Message,
+            await HandleExeptionAsync(context, ex.Message,
                   HttpStatusCode.InternalServerError);
         }
     }
