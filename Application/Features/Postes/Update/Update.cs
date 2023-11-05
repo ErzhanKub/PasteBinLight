@@ -1,48 +1,65 @@
-﻿namespace Application.Features.Postes.Update
+﻿namespace Application.Features.Postes.Update;
+
+public class UpdatePosteByIdCommand : IRequest<Result<PosteDto>>
 {
-    public class UpdatePosteByIdCommand : IRequest<Result<PosteDto>>
+    public Guid UserId { get; set; }
+    public Guid PosteId { get; init; }
+    public string? Title { get; init; }
+    public string? Text { get; init; }
+    public bool IsPrivate { get; init; }
+    public DateTime DeadLine { get; init; }
+}
+
+public class UpdatePosteByIdvalidator : AbstractValidator<UpdatePosteByIdCommand>
+{
+    public UpdatePosteByIdvalidator()
     {
-        public Guid PosteId { get; init; }
-        public Guid UserId { get; set; }
-        public string? Text { get; init; }
-        public string? Title { get; init; }
-        public bool IsPrivate { get; init; }
-        public DateTime DeadLine { get; init; }
+        RuleFor(u => u.UserId).NotEmpty();
+        RuleFor(p => p.PosteId).NotEmpty();
+        RuleFor(p => p.Title).Length(1, 200);
+        RuleFor(p => p.Text).Length(1, 4000);
+        RuleFor(p => p.DeadLine).GreaterThanOrEqualTo(DateTime.Now);
+    }
+}
+
+public class UpdatePosteByIdHandler : IRequestHandler<UpdatePosteByIdCommand, Result<PosteDto>>
+{
+    private readonly IPosteRepository _posteRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IUserRepository _userRepository;
+    private readonly ILogger<UpdatePosteByIdHandler> _logger;
+
+    private const string UserNotFoundMessega = "User is not found";
+    private const string PosteNotFoundMessega = "Poste is not found";
+    private const string DataChangedMessage = "Data changed, poste: {id}";
+    private const string ErrorMessega = "An error occurred while changing the text";
+
+    public UpdatePosteByIdHandler(IPosteRepository repository, IUnitOfWork unitOfWork, IUserRepository userRepository, ILogger<UpdatePosteByIdHandler> logger)
+    {
+        _posteRepository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _userRepository = userRepository;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public class UpdatePosteByIdvalidator : AbstractValidator<UpdatePosteByIdCommand>
+    public async Task<Result<PosteDto>> Handle(UpdatePosteByIdCommand request, CancellationToken cancellationToken)
     {
-        public UpdatePosteByIdvalidator()
-        {
-            RuleFor(p => p.PosteId).NotEmpty();
-            RuleFor(p => p.Title).Length(1, 200);
-            RuleFor(p => p.DeadLine).GreaterThanOrEqualTo(DateTime.Now);
-        }
-    }
-
-    public class UpdatePosteByIdHandler : IRequestHandler<UpdatePosteByIdCommand, Result<PosteDto>>
-    {
-        private readonly IPosteRepository _posteRepository;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IUserRepository _userRepository;
-
-        public UpdatePosteByIdHandler(IPosteRepository repository, IUnitOfWork unitOfWork, IUserRepository userRepository)
-        {
-            _posteRepository = repository ?? throw new ArgumentNullException(nameof(repository));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            _userRepository = userRepository;
-        }
-
-        public async Task<Result<PosteDto>> Handle(UpdatePosteByIdCommand request, CancellationToken cancellationToken)
+        try
         {
             var user = await _userRepository.GetByIdAsync(request.UserId);
             if (user is null)
-                return Result.Fail("User is not found");
+            {
+                _logger.LogWarning(UserNotFoundMessega);
+                return Result.Fail(UserNotFoundMessega);
+            }
 
             var poste = user.Postes.FirstOrDefault(p => p.Id == request.PosteId);
 
             if (poste is null)
-                return Result.Fail("Poste is not found");
+            {
+                _logger.LogWarning(PosteNotFoundMessega);
+                return Result.Fail(PosteNotFoundMessega);
+            }
 
             if (request.Title is not null)
                 poste.Title = request.Title;
@@ -64,7 +81,14 @@
                 IsPrivate = request.IsPrivate,
             };
 
+            _logger.LogInformation(DataChangedMessage, poste.Id);
+
             return Result.Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ErrorMessega);
+            throw;
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿namespace Application.Features.Users.Get;
 
-public record GetAllRequest : IRequest<IReadOnlyList<UserDto>> { }
+public record GetAllRequest : IRequest<Result<IReadOnlyList<UserDto>>> { }
 
-public class GetAllRequestHandler : IRequestHandler<GetAllRequest, IReadOnlyList<UserDto>>
+public class GetAllRequestHandler : IRequestHandler<GetAllRequest, Result<IReadOnlyList<UserDto>>>
 {
     private readonly IUserRepository _userRepository;
     private readonly ILogger<GetAllRequestHandler> _logger;
@@ -16,7 +16,7 @@ public class GetAllRequestHandler : IRequestHandler<GetAllRequest, IReadOnlyList
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<IReadOnlyList<UserDto>> Handle(GetAllRequest request, CancellationToken cancellationToken)
+    public async Task<Result<IReadOnlyList<UserDto>>> Handle(GetAllRequest request, CancellationToken cancellationToken)
     {
         try
         {

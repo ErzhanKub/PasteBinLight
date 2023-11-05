@@ -1,38 +1,54 @@
-﻿namespace Application.Features.Postes.Get
+﻿namespace Application.Features.Postes.Get;
+
+public record GetOnePosteByUrlRequest : IRequest<Result<PosteDto>>
 {
-    public record GetOnePosteByUrlRequest : IRequest<Result<PosteDto>>
+    public string? EncodedGuid { get; init; }
+    public Guid UserId { get; init; }
+}
+
+public class GetOnePosteByUrlValidator : AbstractValidator<GetOnePosteByUrlRequest>
+{
+    public GetOnePosteByUrlValidator()
     {
-        public string? EncodedGuid { get; init; }
-        public Guid UserId { get; init; }
+        RuleFor(u => u.EncodedGuid).NotEmpty();
+    }
+}
+
+public class GetOnePosteByUrlHandler : IRequestHandler<GetOnePosteByUrlRequest, Result<PosteDto>>
+{
+    private readonly IPosteRepository _posteRepository;
+    private readonly ILogger<GetOnePosteByUrlHandler> _logger;
+
+    private const string PosteNotFoundMessega = "Poste not found";
+    private const string AccessDeniedMessega = "Access denied";
+    private const string TextReceived = "Text received: {id}";
+    private const string ErrorMessega = "An error occurred while receiving the text";
+
+    public GetOnePosteByUrlHandler(IPosteRepository posteRepository, ILogger<GetOnePosteByUrlHandler> logger)
+    {
+        _posteRepository = posteRepository ?? throw new ArgumentNullException(nameof(posteRepository));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public class GetOnePosteByUrlValidator : AbstractValidator<GetOnePosteByUrlRequest>
+    public async Task<Result<PosteDto>> Handle(GetOnePosteByUrlRequest request, CancellationToken cancellationToken)
     {
-        public GetOnePosteByUrlValidator()
-        {
-            RuleFor(u => u.EncodedGuid).NotEmpty();
-        }
-    }
-
-    public class GetOnePosteByUrlHandler : IRequestHandler<GetOnePosteByUrlRequest, Result<PosteDto>>
-    {
-        private readonly IPosteRepository _posteRepository;
-        public GetOnePosteByUrlHandler(IPosteRepository posteRepository)
-        {
-            _posteRepository = posteRepository ?? throw new ArgumentNullException(nameof(posteRepository));
-        }
-
-        public async Task<Result<PosteDto>> Handle(GetOnePosteByUrlRequest request, CancellationToken cancellationToken)
+        try
         {
             var posteId = _posteRepository.GetDecodedGuid(request.EncodedGuid!);
 
             var poste = await _posteRepository.GetByIdAsync(posteId);
 
-            if (poste == null)
-                return Result.Fail("Poste not found");
+            if (poste is null)
+            {
+                _logger.LogWarning(PosteNotFoundMessega);
+                return Result.Fail(PosteNotFoundMessega);
+            }
 
             if (poste.IsPrivate && poste.UserId != request.UserId)
-                return Result.Fail<PosteDto>("Access denied");
+            {
+                _logger.LogWarning(AccessDeniedMessega);
+                return Result.Fail<PosteDto>(AccessDeniedMessega);
+            }
 
 
             var text = await _posteRepository.GetTextFromCloudAsync(poste.Url);
@@ -49,7 +65,14 @@
                 Title = poste.Title,
             };
 
+            _logger.LogInformation(TextReceived, poste.Id);
+
             return Result.Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ErrorMessega);
+            throw;
         }
     }
 }

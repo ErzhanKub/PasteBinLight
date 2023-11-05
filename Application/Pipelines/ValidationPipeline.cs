@@ -1,38 +1,37 @@
 ﻿using Application.Extensions;
 
-namespace Application.Pipelines
+namespace Application.Pipelines;
+
+public class ValidationPipeline<TRequest, TResponse>
+    : IPipelineBehavior<TRequest, TResponse>
+    where TRequest : IRequest<TResponse>
+    where TResponse : ResultBase<TResponse>, new()
 {
-    public class ValidationPipeline<TRequest, TResponse>
-        : IPipelineBehavior<TRequest, TResponse>
-        where TRequest : IRequest<TResponse>
-        where TResponse : ResultBase<TResponse>, new()
+    private readonly IValidator<TRequest> _validator;
+
+    public ValidationPipeline(IValidator<TRequest> validator)
     {
-        private readonly IValidator<TRequest> _validator;
+        _validator = validator;
+    }
 
-        public ValidationPipeline(IValidator<TRequest> validator)
+    public async Task<TResponse> Handle(TRequest request,
+        RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+    {
+        try
         {
-            _validator = validator;
+            var validResult = _validator.Validate(request);
+            if (validResult != null && validResult.Errors.Any())
+            {
+                var errors = validResult.Errors.MapToErrors();
+                var result = new TResponse();
+                return result.WithErrors(errors);
+            }
+            return await next();
         }
-
-        public async Task<TResponse> Handle(TRequest request,
-            RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
+        catch (Exception ex)
         {
-            try
-            {
-                var validResult = _validator.Validate(request);
-                if (validResult != null && validResult.Errors.Any())
-                {
-                    var errors = validResult.Errors.MapToErrors();
-                    var result = new TResponse();
-                    return result.WithErrors(errors);
-                }
-                return await next();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                throw;
-            }
+            Console.WriteLine(ex.Message);
+            throw;
         }
     }
 }

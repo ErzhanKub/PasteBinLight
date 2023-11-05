@@ -1,32 +1,43 @@
-﻿using Application.Contracts;
-using Domain.Repositories;
+﻿namespace Application.Features.Postes.Get;
 
-namespace Application.Features.Postes.Get
+public record GetAllPostsForUserRequest : IRequest<Result<List<GetAllPosteDto>>>
 {
-    public record GetAllPostsForUserRequest : IRequest<Result<List<GetAllPosteDto>>> 
+    public Guid UserId { get; init; }
+}
+
+public class GetAllPosteForUserRequestValidator : AbstractValidator<GetAllPostsForUserRequest>
+{
+    public GetAllPosteForUserRequestValidator()
     {
-        public Guid UserId { get; init; }
+        RuleFor(u =>u.UserId).NotEmpty();
+    }
+}
+
+public class GetAllPostsForUserHandler : IRequestHandler<GetAllPostsForUserRequest, Result<List<GetAllPosteDto>>>
+{
+    private readonly IUserRepository _userRepository;
+    private readonly ILogger<GetAllPostsForUserHandler> _logger;
+
+    private const string UserNotFoundMessega = "User is not found";
+    private const string ErrorMessega = "An error occurred while receiving poste from the user";
+    private const string PostesRecieved = "All poste from the user have been received, userId: {Id}";
+
+    public GetAllPostsForUserHandler(IUserRepository userRepository, ILogger<GetAllPostsForUserHandler> logger)
+    {
+        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public class GetAllPosteForUserRequestValidator : AbstractValidator<GetAllPostsForUserRequest>
+    public async Task<Result<List<GetAllPosteDto>>> Handle(GetAllPostsForUserRequest request, CancellationToken cancellationToken)
     {
-        public GetAllPosteForUserRequestValidator() { }
-    }
-
-    public class GetAllPostsForUserHandler : IRequestHandler<GetAllPostsForUserRequest, Result<List<GetAllPosteDto>>>
-    {
-        private readonly IUserRepository _userRepository;
-
-        public GetAllPostsForUserHandler(IUserRepository userRepository)
-        {
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        }
-
-        public async Task<Result<List<GetAllPosteDto>>> Handle(GetAllPostsForUserRequest request, CancellationToken cancellationToken)
+        try
         {
             var user = await _userRepository.GetByIdAsync(request.UserId);
             if (user is null)
-                return Result.Fail("User is not found");
+            {
+                _logger.LogWarning(UserNotFoundMessega);
+                return Result.Fail(UserNotFoundMessega);
+            }
 
             var response = user.Postes.Select(poste => new GetAllPosteDto
             {
@@ -37,7 +48,13 @@ namespace Application.Features.Postes.Get
                 Title = poste.Title,
             }).ToList();
 
+            _logger.LogInformation(PostesRecieved, user.Id);
             return Result.Ok(response);
+        }
+        catch (Exception  ex)
+        {
+            _logger.LogError(ex, ErrorMessega);
+            throw;
         }
     }
 }

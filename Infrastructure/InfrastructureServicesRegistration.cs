@@ -6,23 +6,22 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Infrastructure
+namespace Infrastructure;
+
+public static class InfrastructureServicesRegistration
 {
-    public static class InfrastructureServicesRegistration
+    public static IServiceCollection AddInfrastruct(this IServiceCollection services, IConfiguration configuration)
     {
-        public static IServiceCollection AddInfrastruct(this IServiceCollection services, IConfiguration configuration)
+        services.AddDbContext<AppDbContext>(opts =>
         {
-            services.AddDbContext<AppDbContext>(opts =>
-            {
-                opts.UseSqlServer(configuration.GetConnectionString("Default") ??
-                    "Server=.; Database=PosteBin; Trusted_Connection=SSPI; Encrypt=Optional");
-            });
+            opts.UseSqlServer(configuration.GetConnectionString("Default") ??
+                "Server=.; Database=PosteBin; Trusted_Connection=SSPI; Encrypt=Optional");
+        });
 
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-            services.AddScoped<IUserRepository, UserRepository>();
-            services.AddScoped<IPosteRepository, PosteRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IPosteRepository, PosteRepository>();
 
-            return services;
-        }
+        return services;
     }
 }
