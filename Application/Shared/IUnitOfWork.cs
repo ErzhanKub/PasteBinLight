@@ -1,7 +1,6 @@
-﻿namespace Application.Shared
+﻿namespace Application.Shared;
+
+public interface IUnitOfWork
 {
-    public interface IUnitOfWork
-    {
-        Task SaveCommitAsync();
-    }
+    Task SaveCommitAsync();
 }

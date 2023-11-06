@@ -3,23 +3,24 @@ using Application.Pipelines;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
-namespace Application
+namespace Application;
+
+public static class ApplicationServicesRegistration
 {
-    public static class ApplicationServicesRegistration
+    public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        public static IServiceCollection AddApplication(this IServiceCollection services)
-        {
-            services.AddMediatR(config => config.RegisterServicesFromAssemblies(
-                       Assembly.GetExecutingAssembly()));
+        services.AddLogging();
 
-            services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);
+        services.AddMediatR(config => config.RegisterServicesFromAssemblies(
+                   Assembly.GetExecutingAssembly()));
 
-            services.AddTransient(
-               typeof(IPipelineBehavior<,>),
-               typeof(ValidationPipeline<,>));
+        services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);
+
+        services.AddTransient(
+           typeof(IPipelineBehavior<,>),
+           typeof(ValidationPipeline<,>));
 
 
-            return services;
-        }
+        return services;
     }
 }

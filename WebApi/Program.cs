@@ -1,5 +1,6 @@
 ﻿using Application;
 using Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -7,16 +8,15 @@ using System.Text;
 using WebApi.Middlewere;
 
 var builder = WebApplication.CreateBuilder(args);
-// Serilog
+
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration).CreateLogger();
 builder.Host.UseSerilog();
-////////////////////////////////////////////////////////////////////
 
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-// Добавление возможности Swagger использоваь jwt.
+
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "FP", Version = "v2077" });
@@ -43,8 +43,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
-/////////////////////////////////////////////////////////////////////////////////////////
-// Добавление аунтификации с jwt.
+
 builder.Services.AddAuthentication().AddJwtBearer(opts =>
 {
     opts.SaveToken = true;
@@ -62,19 +61,17 @@ builder.Services.AddAuthentication().AddJwtBearer(opts =>
                         throw new Exception("Jwt not found."))),
     };
 });
-//////////////////////////////////////////////////////////////////////////////////////////
 
-// Добавление политики - обязательное аунтификация
-//builder.Services.AddAuthorization(opts =>
-//{
-//    opts.FallbackPolicy = new AuthorizationPolicyBuilder()
-//        .RequireAuthenticatedUser()
-//        .Build();
-//});
-///////////////////////////////////////////////////////////////////////////
+builder.Services.AddAuthorization(opts =>
+{
+    opts.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastruct(builder.Configuration);
+builder.Services.AddTransient<ExceptionHandlingMiddlwere>();
 
 var app = builder.Build();
 

@@ -1,54 +1,81 @@
-﻿using Application.Shared;
-using Domain.Entities;
-using Domain.Repositories;
-using Microsoft.Extensions.Configuration;
-
-namespace Application.Features.Users.Create
+﻿namespace Application.Features.Users.Create;
+public record CreateUserCommand : IRequest<Result<UserDto>>
 {
-    public record CreateUserCommand : IRequest<Result<Guid>>
+    public required string Username { get; init; }
+    public required string Password { get; init; }
+    public required string Email { get; init; }
+}
+
+public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
+{
+    public CreateUserCommandValidator()
     {
-        public required string Username { get; init; }
-        public required string Password { get; init; }
-        public required string Email { get; init; }
+        RuleFor(c => c.Username)
+            .NotEmpty()
+            .Length(1, 100)
+            .Matches("^[a-zA-Z0-9]*$")
+            .WithMessage("Username can only contain alphanumeric characters");
+
+        RuleFor(c => c.Password)
+            .NotEmpty()
+            .MinimumLength(8)
+            .WithMessage("Password must be at least 8 characters long")
+            .Length(1, 16);
+
+        RuleFor(c => c.Email)
+            .NotEmpty()
+            .EmailAddress();
+    }
+}
+
+public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Result<UserDto>>
+{
+    private readonly IUserRepository _userRepository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<CreateUserCommandHandler> _logger;
+
+    private const string UserCreatedMessega = "User created: {id}";
+    private const string ErrorMessega = "An error occurred while creating users";
+    public CreateUserCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, ILogger<CreateUserCommandHandler> logger)
+    {
+        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
+    public async Task<Result<UserDto>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        public CreateUserCommandValidator()
+        try
         {
-            RuleFor(c => c.Username).NotEmpty().Length(0, 200);
-            RuleFor(c => c.Password).NotEmpty().Length(0, 200);
-            RuleFor(c => c.Email).NotEmpty().EmailAddress();
-        }
-    }
+            var token = _userRepository.GenerateEmailConfirmationToken();
 
-    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Result<Guid>>
-    {
-        private readonly IUserRepository _userRepository;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IConfiguration _configuration;
-
-        public CreateUserCommandHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, IConfiguration configuration)
-        {
-            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            _configuration = configuration;
-        }
-
-        public async Task<Result<Guid>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
-        {
             var user = User.Create(new Username(request.Username),
-                new Password(request.Password),
+                new Password(_userRepository.HashPassword(request.Password)),
                 new Email(request.Email, false),
-                Domain.Enums.Role.User);
+                Domain.Enums.Role.User,
+                token);
 
             await _userRepository.CreateAsync(user);
-
-            //_userRepository.SendEmail(user.Email.Value,);
-
             await _unitOfWork.SaveCommitAsync();
 
-            return Result.Ok(user.Id);
+            _logger.LogInformation(UserCreatedMessega, user.Id);
+
+            await _userRepository.SendEmail(user.Email.Value, token);
+
+            var response = new UserDto
+            {
+                Id = user.Id,
+                Username = user.Username.Value,
+                Email = user.Email.Value,
+                Role = user.Role,
+            };
+
+            return Result.Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ErrorMessega);
+            throw;
         }
     }
 }

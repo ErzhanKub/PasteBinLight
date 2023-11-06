@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -19,7 +18,8 @@ namespace Infrastructure.Migrations
                     Username = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Password = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Role = table.Column<int>(type: "int", nullable: false)
+                    Role = table.Column<int>(type: "int", nullable: false),
+                    ConfirmationToken = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -53,13 +53,13 @@ namespace Infrastructure.Migrations
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "Id", "Email", "Password", "Role", "Username" },
-                values: new object[] { new Guid("905536f1-a44a-41b9-8406-de4a76ec7477"), "string@mail.com", "b4923143305b8c19f5c5031c406be92b99ce221e00c795598356d9fc0fc117bc", 2, "SuperAdmin2077CP" });
+                columns: new[] { "Id", "ConfirmationToken", "Email", "Password", "Role", "Username" },
+                values: new object[] { new Guid("8be5a326-69e8-432d-b0cb-8b3a1814b2ee"), "ConfirmToken", "string@mail.com", "b4923143305b8c19f5c5031c406be92b99ce221e00c795598356d9fc0fc117bc", 2, "SuperAdmin2077CP" });
 
             migrationBuilder.InsertData(
                 table: "Postes",
                 columns: new[] { "Id", "DateCreated", "DeadLine", "DisLikes", "IsPrivate", "Likes", "Title", "Url", "UserId" },
-                values: new object[] { new Guid("3300f7e7-415a-4359-8319-9dd2d2bc0c42"), new DateTime(2023, 11, 4, 17, 41, 31, 72, DateTimeKind.Local).AddTicks(9156), new DateTime(2023, 12, 4, 17, 41, 31, 72, DateTimeKind.Local).AddTicks(9168), 13L, false, 183L, "My day", "https://www.youtube.com/", new Guid("905536f1-a44a-41b9-8406-de4a76ec7477") });
+                values: new object[] { new Guid("ed6019a8-2713-41f7-b4da-c94e1c5d8886"), new DateTime(2023, 11, 4, 18, 54, 34, 612, DateTimeKind.Local).AddTicks(1492), new DateTime(2023, 12, 4, 18, 54, 34, 612, DateTimeKind.Local).AddTicks(1504), 13L, false, 183L, "My day", "https://www.youtube.com/", new Guid("8be5a326-69e8-432d-b0cb-8b3a1814b2ee") });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Postes_UserId",

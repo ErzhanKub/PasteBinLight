@@ -1,25 +1,27 @@
-﻿using Application.Contracts;
-using Domain.Repositories;
+﻿namespace Application.Features.Postes.Get;
 
-namespace Application.Features.Postes.Get
+public record GetAllPosteRequest : IRequest<Result<List<GetAllPosteDto>>> { }
+public class GetAllPosteRequestValidator : AbstractValidator<GetAllPosteRequest>
 {
-    public record GetAllPosteRequest : IRequest<Result<List<GetAllPosteDto>>> { }
+    public GetAllPosteRequestValidator() { }
+}
+public class GetAllPosteHandler : IRequestHandler<GetAllPosteRequest, Result<List<GetAllPosteDto>>>
+{
+    private readonly IPosteRepository _posteRepository;
+    private readonly ILogger<GetAllPosteHandler> _logger;
 
-    public class GetAllPosteRequestValidator : AbstractValidator<GetAllPosteRequest>
+    private const string PosteReceivedMessega = "Received all public poste";
+    private const string ErrorMessega = "An error occurred while receiving mail";
+
+    public GetAllPosteHandler(IPosteRepository posteRepository, ILogger<GetAllPosteHandler> logger)
     {
-        public GetAllPosteRequestValidator() { }
+        _posteRepository = posteRepository ?? throw new ArgumentNullException(nameof(posteRepository));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public class GetAllPosteHandler : IRequestHandler<GetAllPosteRequest, Result<List<GetAllPosteDto>>>
+    public async Task<Result<List<GetAllPosteDto>>> Handle(GetAllPosteRequest request, CancellationToken cancellationToken)
     {
-        private readonly IPosteRepository _posteRepository;
-
-        public GetAllPosteHandler(IPosteRepository posteRepository)
-        {
-            _posteRepository = posteRepository ?? throw new ArgumentNullException(nameof(posteRepository));
-        }
-
-        public async Task<Result<List<GetAllPosteDto>>> Handle(GetAllPosteRequest request, CancellationToken cancellationToken)
+        try
         {
             var allPostes = await _posteRepository.GetAllAsync();
             var publicPostes = allPostes.Where(p => p.IsPrivate != true).ToList();
@@ -33,7 +35,14 @@ namespace Application.Features.Postes.Get
                 Title = poste.Title,
             }).ToList();
 
+            _logger.LogInformation(PosteReceivedMessega);
+
             return Result.Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ErrorMessega);
+            throw;
         }
     }
 }

@@ -1,48 +1,40 @@
 ﻿using System.Net;
 using WebApi.Dtos;
-
-namespace WebApi.Middlewere
+namespace WebApi.Middlewere;
+public class ExceptionHandlingMiddlwere : IMiddleware
 {
-    public class ExceptionHandlingMiddlwere
+    private readonly ILogger<ExceptionHandlingMiddlwere> _logger;
+    public ExceptionHandlingMiddlwere(
+        ILogger<ExceptionHandlingMiddlwere> logger) =>
+        _logger = logger;
+    public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        private readonly RequestDelegate _next;
-        private readonly ILogger<ExceptionHandlingMiddlwere> _logger;
-        public ExceptionHandlingMiddlwere(RequestDelegate next,
-            ILogger<ExceptionHandlingMiddlwere> logger)
+        try
         {
-            _next = next;
-            _logger = logger;
+            await next(context);
         }
-
-        public async Task InvokeAsync(HttpContext httpContext)
+        catch (Exception ex)
         {
-            try
-            {
-                await _next(httpContext);
-            }
-            catch (Exception ex)
-            {
-                await HandleExeptionAsync(httpContext, ex.Message,
-                      HttpStatusCode.InternalServerError);
-            }
+            await HandleExeptionAsync(context, ex.Message,
+                  HttpStatusCode.InternalServerError);
         }
+    }
 
-        private async Task HandleExeptionAsync(HttpContext context,
-            string exMassage, HttpStatusCode httpStatusCode)
+    private async Task HandleExeptionAsync(HttpContext context,
+        string exMassage, HttpStatusCode httpStatusCode)
+    {
+        _logger.LogError(exMassage);
+
+        HttpResponse response = context.Response;
+        response.ContentType = "application/json";
+        response.StatusCode = (int)httpStatusCode;
+
+        ErrorDto errorDto = new()
         {
-            _logger.LogError(exMassage);
+            Message = exMassage,
+            StatusCode = (int)httpStatusCode,
+        };
 
-            HttpResponse response = context.Response;
-            response.ContentType = "application/json";
-            response.StatusCode = (int)httpStatusCode;
-
-            ErrorDto errorDto = new()
-            {
-                Message = exMassage,
-                StatusCode = (int)httpStatusCode,
-            };
-
-            await response.WriteAsJsonAsync(errorDto);
-        }
+        await response.WriteAsJsonAsync(errorDto);
     }
 }
