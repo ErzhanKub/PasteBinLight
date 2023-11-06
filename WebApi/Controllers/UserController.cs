@@ -4,7 +4,6 @@ using Application.Features.Users.Get;
 using Application.Features.Users.Update;
 using Domain.Entities;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Web;

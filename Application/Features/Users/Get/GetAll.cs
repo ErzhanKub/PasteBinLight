@@ -1,7 +1,13 @@
 ﻿namespace Application.Features.Users.Get;
 
 public record GetAllRequest : IRequest<Result<IReadOnlyList<UserDto>>> { }
-
+public class GetAllUsersValidator : AbstractValidator<GetAllRequest>
+{
+    public GetAllUsersValidator()
+    {
+        
+    }
+}
 public class GetAllRequestHandler : IRequestHandler<GetAllRequest, Result<IReadOnlyList<UserDto>>>
 {
     private readonly IUserRepository _userRepository;

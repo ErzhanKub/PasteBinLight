@@ -1,5 +1,4 @@
-﻿using Application.Contracts;
-using Application.Features.Users.Create;
+﻿using Application.Features.Users.Create;
 using Application.Features.Users.Login;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -23,7 +22,6 @@ public class AuthController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("users")]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -36,7 +34,7 @@ public class AuthController : ControllerBase
         if (result.IsSuccess)
         {
             _logger.LogInformation("Created user: {Id}", result.Value.Id);
-            return CreatedAtAction(nameof(UserDto), result.Value);
+            return Created($"/api/Auth/{result.Value.Id}", result.Value);
         }
         _logger.LogError("Failed to create user: {Reasons}", result.Reasons);
         return BadRequest(result.Reasons);
@@ -44,7 +42,6 @@ public class AuthController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("sessions")]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]

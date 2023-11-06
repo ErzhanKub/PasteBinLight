@@ -1,7 +1,6 @@
 ﻿using Application.Features.Postes.Create;
 using Application.Features.Postes.Delete;
 using Application.Features.Postes.Get;
-using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -24,7 +23,6 @@ public class PosteController : ControllerBase
     }
 
     [HttpPost]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -48,7 +46,6 @@ public class PosteController : ControllerBase
     }
 
     [HttpGet("{encodedGuid}")]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Получает запись по кодированному GUID.")]
@@ -57,6 +54,8 @@ public class PosteController : ControllerBase
     public async Task<IActionResult> GetPoste(string encodedGuid)
     {
         var currentUser = HttpContext.User;
+
+        //string decodedToken = HttpUtility.UrlDecode(encodedGuid);
 
         var request = new GetOnePosteByUrlRequest
         {
@@ -76,7 +75,6 @@ public class PosteController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Удаляет запись по ID.")]
@@ -104,7 +102,6 @@ public class PosteController : ControllerBase
     }
 
     [HttpGet]
-    [Produces("application/json")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Получает все записи.")]

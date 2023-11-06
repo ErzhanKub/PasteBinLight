@@ -1,18 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.Net;
+﻿using System.Net;
 using WebApi.Dtos;
-
 namespace WebApi.Middlewere;
-
 public class ExceptionHandlingMiddlwere : IMiddleware
 {
     private readonly ILogger<ExceptionHandlingMiddlwere> _logger;
-
     public ExceptionHandlingMiddlwere(
         ILogger<ExceptionHandlingMiddlwere> logger) =>
         _logger = logger;
-
-
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
         try
