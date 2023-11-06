@@ -1,11 +1,11 @@
 ﻿namespace Application.Features.Postes.Get;
 
-public record GetAllPostsForUserRequest : IRequest<Result<List<GetAllPosteDto>>>
+public record GetAllPastesForUserRequest : IRequest<Result<List<GetAllPosteDto>>>
 {
     public Guid UserId { get; init; }
 }
 
-public class GetAllPosteForUserRequestValidator : AbstractValidator<GetAllPostsForUserRequest>
+public class GetAllPosteForUserRequestValidator : AbstractValidator<GetAllPastesForUserRequest>
 {
     public GetAllPosteForUserRequestValidator()
     {
@@ -13,7 +13,7 @@ public class GetAllPosteForUserRequestValidator : AbstractValidator<GetAllPostsF
     }
 }
 
-public class GetAllPostsForUserHandler : IRequestHandler<GetAllPostsForUserRequest, Result<List<GetAllPosteDto>>>
+public class GetAllPostsForUserHandler : IRequestHandler<GetAllPastesForUserRequest, Result<List<GetAllPosteDto>>>
 {
     private readonly IUserRepository _userRepository;
     private readonly ILogger<GetAllPostsForUserHandler> _logger;
@@ -28,7 +28,7 @@ public class GetAllPostsForUserHandler : IRequestHandler<GetAllPostsForUserReque
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<List<GetAllPosteDto>>> Handle(GetAllPostsForUserRequest request, CancellationToken cancellationToken)
+    public async Task<Result<List<GetAllPosteDto>>> Handle(GetAllPastesForUserRequest request, CancellationToken cancellationToken)
     {
         try
         {
