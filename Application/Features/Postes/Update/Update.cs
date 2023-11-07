@@ -1,6 +1,6 @@
 ﻿namespace Application.Features.Postes.Update;
 
-public class UpdatePosteByIdCommand : IRequest<Result<PosteDto>>
+public class UpdatePasteByIdCommand : IRequest<Result<PasteDto>>
 {
     public Guid UserId { get; set; }
     public Guid PosteId { get; init; }
@@ -10,7 +10,7 @@ public class UpdatePosteByIdCommand : IRequest<Result<PosteDto>>
     public DateTime DeadLine { get; init; }
 }
 
-public class UpdatePosteByIdvalidator : AbstractValidator<UpdatePosteByIdCommand>
+public class UpdatePosteByIdvalidator : AbstractValidator<UpdatePasteByIdCommand>
 {
     public UpdatePosteByIdvalidator()
     {
@@ -22,9 +22,9 @@ public class UpdatePosteByIdvalidator : AbstractValidator<UpdatePosteByIdCommand
     }
 }
 
-public class UpdatePosteByIdHandler : IRequestHandler<UpdatePosteByIdCommand, Result<PosteDto>>
+public class UpdatePosteByIdHandler : IRequestHandler<UpdatePasteByIdCommand, Result<PasteDto>>
 {
-    private readonly IPosteRepository _posteRepository;
+    private readonly IPasteRepository _posteRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserRepository _userRepository;
     private readonly ILogger<UpdatePosteByIdHandler> _logger;
@@ -34,7 +34,7 @@ public class UpdatePosteByIdHandler : IRequestHandler<UpdatePosteByIdCommand, Re
     private const string DataChangedMessage = "Data changed, poste: {id}";
     private const string ErrorMessega = "An error occurred while changing the text";
 
-    public UpdatePosteByIdHandler(IPosteRepository repository, IUnitOfWork unitOfWork, IUserRepository userRepository, ILogger<UpdatePosteByIdHandler> logger)
+    public UpdatePosteByIdHandler(IPasteRepository repository, IUnitOfWork unitOfWork, IUserRepository userRepository, ILogger<UpdatePosteByIdHandler> logger)
     {
         _posteRepository = repository ?? throw new ArgumentNullException(nameof(repository));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -42,7 +42,7 @@ public class UpdatePosteByIdHandler : IRequestHandler<UpdatePosteByIdCommand, Re
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<PosteDto>> Handle(UpdatePosteByIdCommand request, CancellationToken cancellationToken)
+    public async Task<Result<PasteDto>> Handle(UpdatePasteByIdCommand request, CancellationToken cancellationToken)
     {
         try
         {
@@ -72,7 +72,7 @@ public class UpdatePosteByIdHandler : IRequestHandler<UpdatePosteByIdCommand, Re
             _posteRepository.Update(poste);
             await _unitOfWork.SaveCommitAsync();
 
-            var response = new PosteDto
+            var response = new PasteDto
             {
                 Id = poste.Id,
                 DeadLine = request.DeadLine,

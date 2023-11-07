@@ -3,10 +3,7 @@
 public record GetAllRequest : IRequest<Result<IReadOnlyList<UserDto>>> { }
 public class GetAllUsersValidator : AbstractValidator<GetAllRequest>
 {
-    public GetAllUsersValidator()
-    {
-        
-    }
+    public GetAllUsersValidator() { }
 }
 public class GetAllRequestHandler : IRequestHandler<GetAllRequest, Result<IReadOnlyList<UserDto>>>
 {

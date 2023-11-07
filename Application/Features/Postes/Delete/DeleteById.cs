@@ -1,12 +1,12 @@
 ﻿namespace Application.Features.Postes.Delete;
 
-public record DeletePosteByIdsCommand : IRequest<Result<Guid>>
+public record DeletePasteByIdsCommand : IRequest<Result<Guid>>
 {
     public Guid UserId { get; set; }
     public Guid PosteId { get; init; }
 }
 
-public class DeletePosteByIdsCommandValidator : AbstractValidator<DeletePosteByIdsCommand>
+public class DeletePosteByIdsCommandValidator : AbstractValidator<DeletePasteByIdsCommand>
 {
     public DeletePosteByIdsCommandValidator()
     {
@@ -19,10 +19,10 @@ public class DeletePosteByIdsCommandValidator : AbstractValidator<DeletePosteByI
     }
 }
 
-public class DeletePosteByIdsHandler : IRequestHandler<DeletePosteByIdsCommand, Result<Guid>>
+public class DeletePosteByIdsHandler : IRequestHandler<DeletePasteByIdsCommand, Result<Guid>>
 {
     private readonly IUserRepository _userRepository;
-    private readonly IPosteRepository _posteRepository;
+    private readonly IPasteRepository _posteRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<DeletePosteByIdsHandler> _logger;
 
@@ -32,7 +32,7 @@ public class DeletePosteByIdsHandler : IRequestHandler<DeletePosteByIdsCommand, 
     private const string ChangesSavedMessega = "Changes are saved to the local database";
     private const string ErrorMessega = "An error occurred while deleting mail";
 
-    public DeletePosteByIdsHandler(IUserRepository userRepository, IPosteRepository posteRepository, IUnitOfWork unitOfWork, ILogger<DeletePosteByIdsHandler> logger)
+    public DeletePosteByIdsHandler(IUserRepository userRepository, IPasteRepository posteRepository, IUnitOfWork unitOfWork, ILogger<DeletePosteByIdsHandler> logger)
     {
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _posteRepository = posteRepository ?? throw new ArgumentNullException(nameof(posteRepository));
@@ -40,7 +40,7 @@ public class DeletePosteByIdsHandler : IRequestHandler<DeletePosteByIdsCommand, 
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<Guid>> Handle(DeletePosteByIdsCommand request, CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(DeletePasteByIdsCommand request, CancellationToken cancellationToken)
     {
         try
         {

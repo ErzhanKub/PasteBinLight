@@ -1,6 +1,6 @@
 ﻿namespace Application.Features.Postes.Create;
 
-public record CreatePosteCommand : IRequest<Result<string>>
+public record CreatePasteCommand : IRequest<Result<string>>
 {
     public Guid UserId { get; set; }
     public required string Text { get; init; }
@@ -9,7 +9,7 @@ public record CreatePosteCommand : IRequest<Result<string>>
     public bool IsPrivate { get; init; }
 }
 
-public class CreatePosteCommandValidator : AbstractValidator<CreatePosteCommand>
+public class CreatePosteCommandValidator : AbstractValidator<CreatePasteCommand>
 {
     public CreatePosteCommandValidator()
     {
@@ -20,10 +20,10 @@ public class CreatePosteCommandValidator : AbstractValidator<CreatePosteCommand>
     }
 }
 
-public sealed class CreatePosteHandler : IRequestHandler<CreatePosteCommand, Result<string>>
+public sealed class CreatePosteHandler : IRequestHandler<CreatePasteCommand, Result<string>>
 {
     private readonly IUserRepository _userRepository;
-    private readonly IPosteRepository _posteRepository;
+    private readonly IPasteRepository _posteRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreatePosteHandler> _logger;
     
@@ -33,7 +33,7 @@ public sealed class CreatePosteHandler : IRequestHandler<CreatePosteCommand, Res
     private const string PosteSavedMessage = "Poste saved to local database, posteId: {posteId}; userId: {userId}";
     private const string ErrorMessage = "An error occurred during poste creation";
 
-    public CreatePosteHandler(IUserRepository userRepository, IPosteRepository posteRepository, IUnitOfWork unitOfWork, ILogger<CreatePosteHandler> logger)
+    public CreatePosteHandler(IUserRepository userRepository, IPasteRepository posteRepository, IUnitOfWork unitOfWork, ILogger<CreatePosteHandler> logger)
     {
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _posteRepository = posteRepository ?? throw new ArgumentNullException(nameof(posteRepository));
@@ -41,7 +41,7 @@ public sealed class CreatePosteHandler : IRequestHandler<CreatePosteCommand, Res
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<string>> Handle(CreatePosteCommand request, CancellationToken cancellationToken)
+    public async Task<Result<string>> Handle(CreatePasteCommand request, CancellationToken cancellationToken)
     {
         try
         {

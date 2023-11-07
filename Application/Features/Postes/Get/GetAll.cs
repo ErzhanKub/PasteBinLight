@@ -1,25 +1,25 @@
 ﻿namespace Application.Features.Postes.Get;
 
-public record GetAllPosteRequest : IRequest<Result<List<GetAllPosteDto>>> { }
-public class GetAllPosteRequestValidator : AbstractValidator<GetAllPosteRequest>
+public record GetAllPasteRequest : IRequest<Result<List<GetAllPosteDto>>> { }
+public class GetAllPosteRequestValidator : AbstractValidator<GetAllPasteRequest>
 {
     public GetAllPosteRequestValidator() { }
 }
-public class GetAllPosteHandler : IRequestHandler<GetAllPosteRequest, Result<List<GetAllPosteDto>>>
+public class GetAllPosteHandler : IRequestHandler<GetAllPasteRequest, Result<List<GetAllPosteDto>>>
 {
-    private readonly IPosteRepository _posteRepository;
+    private readonly IPasteRepository _posteRepository;
     private readonly ILogger<GetAllPosteHandler> _logger;
 
     private const string PosteReceivedMessega = "Received all public poste";
     private const string ErrorMessega = "An error occurred while receiving mail";
 
-    public GetAllPosteHandler(IPosteRepository posteRepository, ILogger<GetAllPosteHandler> logger)
+    public GetAllPosteHandler(IPasteRepository posteRepository, ILogger<GetAllPosteHandler> logger)
     {
         _posteRepository = posteRepository ?? throw new ArgumentNullException(nameof(posteRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<List<GetAllPosteDto>>> Handle(GetAllPosteRequest request, CancellationToken cancellationToken)
+    public async Task<Result<List<GetAllPosteDto>>> Handle(GetAllPasteRequest request, CancellationToken cancellationToken)
     {
         try
         {
