@@ -20,7 +20,7 @@ public class RecordRepository : IRecordRepository
         return entity.Id;
     }
 
-    public Task<Guid[]> DeleteRangeAsync(params Guid[] ids)
+    public Task<Guid[]> DeleteByIdAsync(params Guid[] ids)
     {
         var posteToDelete = _dbcontext.Postes.Where(p => ids.Contains(p.Id));
         _dbcontext.Postes.RemoveRange(posteToDelete);

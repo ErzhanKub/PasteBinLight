@@ -82,34 +82,6 @@ public class RecordController : ControllerBase
         return NotFound(response.Reasons);
     }
 
-    [HttpDelete("{id}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    [SwaggerOperation(Summary = "Удаляет запись по ID.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "Record Deleted Successfully")]
-    [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(ValidationProblemDetails))]
-    public async Task<IActionResult> DeleteRecord(Guid id)
-    {
-        var user = HttpContext.User;
-
-        var command = new DeleteRecordByIdCommand
-        {
-            RecordId = id,
-            UserId = UserServices.GetCurrentUserId(user)
-        };
-
-        var result = await _mediator.Send(command);
-
-        if (result.IsSuccess)
-        {
-            _logger.LogInformation("Deleted record: {Id}", command.RecordId);
-            return Ok(result.Value);
-        }
-        _logger.LogError("Failed to delete record: {Reasons}", result.Reasons);
-        return NotFound(result.Reasons);
-    }
-
     [HttpGet("allForAdmin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -127,6 +99,22 @@ public class RecordController : ControllerBase
         }
         _logger.LogError("Failed to retrieve all records: {Reasons}", result.Reasons);
         return NotFound(result.Reasons);
+    }
+
+    [HttpGet("all")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [SwaggerOperation(Summary = "Получение своих записей.")]
+    [SwaggerResponse(StatusCodes.Status200OK, "All Records Retrieved Successfully")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(ValidationProblemDetails))]
+    public async Task<IActionResult> GetAllForUser()
+    {
+        var user = HttpContext.User;
+        var userId = UserServices.GetCurrentUserId(user);
+        var request = new GetAllRecordsForUserRequest() { UserId = userId };
+        var result = await _mediator.Send(request);
+        if (result.IsSuccess) return Ok(result.Value);
+        return BadRequest(result.Reasons);
     }
 
     [HttpGet("{Id}")]
@@ -157,20 +145,32 @@ public class RecordController : ControllerBase
         return NotFound(response.Reasons);
     }
 
-    [HttpGet("all")]
+    [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(Summary = "Получение своих записей.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "All Records Retrieved Successfully")]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [SwaggerOperation(Summary = "Удаляет запись по ID.")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Record Deleted Successfully")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(ValidationProblemDetails))]
-    public async Task<IActionResult> GetAllForUser()
+    public async Task<IActionResult> DeleteRecord(Guid id)
     {
         var user = HttpContext.User;
-        var userId = UserServices.GetCurrentUserId(user);
-        var request = new GetAllRecordsForUserRequest() { UserId = userId };
-        var result = await _mediator.Send(request);
-        if (result.IsSuccess) return Ok(result.Value);
-        return BadRequest(result.Reasons);
+
+        var command = new DeleteRecordByIdCommand
+        {
+            RecordId = id,
+            UserId = UserServices.GetCurrentUserId(user)
+        };
+
+        var result = await _mediator.Send(command);
+
+        if (result.IsSuccess)
+        {
+            _logger.LogInformation("Deleted record: {Id}", command.RecordId);
+            return Ok(result.Value);
+        }
+        _logger.LogError("Failed to delete record: {Reasons}", result.Reasons);
+        return NotFound(result.Reasons);
     }
 
     [HttpPatch]

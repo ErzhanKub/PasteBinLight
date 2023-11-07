@@ -22,7 +22,7 @@ namespace Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Entities.Poste", b =>
+            modelBuilder.Entity("Domain.Entities.Record", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -62,15 +62,15 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("ed6019a8-2713-41f7-b4da-c94e1c5d8886"),
-                            DateCreated = new DateTime(2023, 11, 4, 18, 54, 34, 612, DateTimeKind.Local).AddTicks(1492),
-                            DeadLine = new DateTime(2023, 12, 4, 18, 54, 34, 612, DateTimeKind.Local).AddTicks(1504),
+                            Id = new Guid("90c5b3b2-8a8d-44cf-ab9b-306dd828c465"),
+                            DateCreated = new DateTime(2023, 11, 7, 20, 44, 38, 91, DateTimeKind.Local).AddTicks(7317),
+                            DeadLine = new DateTime(2023, 12, 7, 20, 44, 38, 91, DateTimeKind.Local).AddTicks(7327),
                             DisLikes = 13L,
                             IsPrivate = false,
                             Likes = 183L,
                             Title = "My day",
                             Url = "https://www.youtube.com/",
-                            UserId = new Guid("8be5a326-69e8-432d-b0cb-8b3a1814b2ee")
+                            UserId = new Guid("323c8e8b-8e44-47bf-89ce-e8af73c8007d")
                         });
                 });
 
@@ -109,7 +109,7 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("8be5a326-69e8-432d-b0cb-8b3a1814b2ee"),
+                            Id = new Guid("323c8e8b-8e44-47bf-89ce-e8af73c8007d"),
                             ConfirmationToken = "ConfirmToken",
                             Email = "string@mail.com",
                             Password = "b4923143305b8c19f5c5031c406be92b99ce221e00c795598356d9fc0fc117bc",
@@ -118,10 +118,10 @@ namespace Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("Domain.Entities.Poste", b =>
+            modelBuilder.Entity("Domain.Entities.Record", b =>
                 {
                     b.HasOne("Domain.Entities.User", "User")
-                        .WithMany("Postes")
+                        .WithMany("Records")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
 
@@ -130,7 +130,7 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
-                    b.Navigation("Postes");
+                    b.Navigation("Records");
                 });
 #pragma warning restore 612, 618
         }
