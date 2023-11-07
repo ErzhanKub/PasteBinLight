@@ -65,7 +65,7 @@ public class DeleteRecordByIdsHandler : IRequestHandler<DeleteRecordByIdCommand,
             await _recordCloudService.DeleteTextFromCloudAsync(deletedRecord.Id.ToString());
             _logger.LogInformation(RemovedTextMessega, deletedRecord.Id);
 
-            var response = await _recordRepository.DeleteRangeAsync(deletedRecord.Id);
+            var response = await _recordRepository.DeleteByIdAsync(deletedRecord.Id);
             _userRepository.Update(user);
             await _unitOfWork.SaveCommitAsync();
 

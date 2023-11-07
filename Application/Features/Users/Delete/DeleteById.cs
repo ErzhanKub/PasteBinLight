@@ -39,7 +39,7 @@ public class DeleteUsersByIdsHandler : IRequestHandler<DeleteUsersByIdsCommand, 
     {
         try
         {
-            var result = await _userRepository.DeleteRangeAsync(request.Id!);
+            var result = await _userRepository.DeleteByIdAsync(request.Id!);
 
             if (result is null)
             {

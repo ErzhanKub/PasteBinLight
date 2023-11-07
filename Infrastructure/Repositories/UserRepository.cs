@@ -29,14 +29,13 @@ public class UserRepository : IUserRepository
         return user;
     }
 
-
     public async Task<Guid> CreateAsync(User entity)
     {
         await _dbcontext.Users.AddAsync(entity);
         return entity.Id;
     }
 
-    public Task<Guid[]> DeleteRangeAsync(params Guid[] ids)
+    public Task<Guid[]> DeleteByIdAsync(params Guid[] ids)
     {
         var userToDelete = _dbcontext.Users.Where(u => ids.Contains(u.Id));
         _dbcontext.Users.RemoveRange(userToDelete);
@@ -90,8 +89,6 @@ public class UserRepository : IUserRepository
         }
     }
 
-
-
     public void Update(User entity)
     {
         _dbcontext.Users.Update(entity);
@@ -103,5 +100,22 @@ public class UserRepository : IUserRepository
         RandomNumberGenerator.Fill(tokenData);
 
         return Convert.ToBase64String(tokenData);
+    }
+
+    public async Task<string> DeleteUserByUsernameAsync(string username)
+    {
+        var user = _dbcontext.Users.SingleOrDefault(u => u.Username != null && u.Username.Value == username);
+        if (user != null)
+        {
+            _dbcontext.Users.Remove(user);
+            await _dbcontext.SaveChangesAsync();
+        }
+        return username;
+    }
+
+    public async Task<User?> GetByUsernameAsync(string username)
+    {
+        var user = await _dbcontext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username.ToString() == username);
+        return user;
     }
 }
