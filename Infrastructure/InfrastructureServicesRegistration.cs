@@ -24,6 +24,7 @@ public static class InfrastructureServicesRegistration
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRecordRepository, RecordRepository>();
         services.AddScoped<IRecordCloudService, RecordCloudService>();
+        services.AddScoped<IQRCodeGeneratorService, QRCodeGeneratorService>();
 
         return services;
     }

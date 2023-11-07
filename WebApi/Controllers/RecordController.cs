@@ -2,6 +2,7 @@
 using Application.Features.Records.Delete;
 using Application.Features.Records.Get;
 using Application.Features.Records.Update;
+using Domain.IServices;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -15,12 +16,14 @@ namespace WebApi.Controllers;
 public class RecordController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly IQRCodeGeneratorService _QRCodeGeneratorService;
     private readonly ILogger<RecordController> _logger;
 
-    public RecordController(IMediator mediator, ILogger<RecordController> logger)
+    public RecordController(IMediator mediator, ILogger<RecordController> logger, IQRCodeGeneratorService qRCodeGeneratorService)
     {
         _mediator = mediator;
         _logger = logger;
+        _QRCodeGeneratorService = qRCodeGeneratorService;
     }
 
     [HttpPost]
@@ -51,7 +54,11 @@ public class RecordController : ControllerBase
         }
 
         _logger.LogInformation("Created Record: {Value}", response.Value);
-        return Created($"/api/Record/{response.Value}", response.Value);
+
+        var recordUrl = $"https://localhost:7056/api/Record/{response.Value}";
+        var qrCode = _QRCodeGeneratorService.GeneratorQRCode(recordUrl);
+
+        return Created(recordUrl, new { Url = recordUrl, QRCode = qrCode });
     }
 
     [HttpGet("{encodedGuid}")]
