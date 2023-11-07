@@ -35,9 +35,9 @@ public sealed class User : BaseEntity
 
     public void AddRecord(Record record)
     {
-        var postesList = Records.ToList();
-        postesList.Add(record);
-        Records = new ReadOnlyCollection<Record>(postesList);
+        var recordsList = Records.ToList();
+        recordsList.Add(record);
+        Records = new ReadOnlyCollection<Record>(recordsList);
     }
 
     public void RemoveRecord(Record record)

@@ -6,5 +6,5 @@ public interface IGenericRepository<TEntity> where TEntity : class
     Task<IReadOnlyList<TEntity>> GetAllAsync();
     Task<Guid> CreateAsync(TEntity entity);
     void Update(TEntity entity);
-    Task<Guid[]> DeleteRangeAsync(params Guid[] id);
+    Task<Guid[]> DeleteByIdAsync(params Guid[] id);
 }
