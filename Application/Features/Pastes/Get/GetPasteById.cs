@@ -1,6 +1,8 @@
-﻿namespace Application.Features.Postes.Get;
+﻿using Domain.IServices;
 
-public record GetPasteByIdRequest : IRequest<Result<PosteDto>>
+namespace Application.Features.Postes.Get;
+
+public record GetPasteByIdRequest : IRequest<Result<PasteDto>>
 {
     public Guid PasteId { get; init; }
     public Guid UserId { get; init; }
@@ -15,26 +17,28 @@ public class GetPasteByIdValidator : AbstractValidator<GetPasteByIdRequest>
     }
 }
 
-public sealed class GetPasteByIdHandler : IRequestHandler<GetPasteByIdRequest, Result<PosteDto>>
+public sealed class GetPasteByIdHandler : IRequestHandler<GetPasteByIdRequest, Result<PasteDto>>
 {
-    private readonly IPasteRepository _posteRepository;
+    private readonly IPasteRepository _pasteRepository;
+    private readonly IPasteCloudService _pasteCloudService;
     private readonly ILogger<GetPasteByIdHandler> _logger;
 
     private const string PasteNotFoundMessega = "Paste not found";
     private const string AccessDeniedMessege = "Access denied";
     private const string PasteReceived = "Paste received: {id}";
     private const string ErrorMessage = "An error occurred while receiving the paste";
-    public GetPasteByIdHandler(IPasteRepository posteRepository, IUserRepository userRepository, ILogger<GetPasteByIdHandler> logger)
+    public GetPasteByIdHandler(IPasteRepository pasteRepository, IUserRepository userRepository, ILogger<GetPasteByIdHandler> logger, IPasteCloudService pasteCloudService)
     {
-        _posteRepository = posteRepository ?? throw new ArgumentNullException(nameof(posteRepository));
+        _pasteRepository = pasteRepository ?? throw new ArgumentNullException(nameof(pasteRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _pasteCloudService = pasteCloudService ?? throw new ArgumentNullException(nameof(pasteCloudService));
     }
 
-    public async Task<Result<PosteDto>> Handle(GetPasteByIdRequest request, CancellationToken cancellationToken)
+    public async Task<Result<PasteDto>> Handle(GetPasteByIdRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            var paste = await _posteRepository.GetByIdAsync(request.PasteId).ConfigureAwait(false);
+            var paste = await _pasteRepository.GetByIdAsync(request.PasteId).ConfigureAwait(false);
             if (paste is null)
             {
                 _logger.LogWarning(PasteNotFoundMessega);
@@ -45,12 +49,12 @@ public sealed class GetPasteByIdHandler : IRequestHandler<GetPasteByIdRequest, R
             if (paste.IsPrivate && paste.UserId != request.UserId)
             {
                 _logger.LogWarning(AccessDeniedMessege);
-                return Result.Fail<PosteDto>(AccessDeniedMessege);
+                return Result.Fail<PasteDto>(AccessDeniedMessege);
             }
 
-            var text = await _posteRepository.GetTextFromCloudAsync(paste.Url);
+            var text = await _pasteCloudService.GetTextFromCloudAsync(paste.Url);
 
-            var response = new PosteDto
+            var response = new PasteDto
             {
                 Id = paste.Id,
                 Title = paste.Title,

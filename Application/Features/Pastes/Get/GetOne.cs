@@ -1,6 +1,8 @@
-﻿namespace Application.Features.Postes.Get;
+﻿using Domain.IServices;
 
-public record GetOnePasteByUrlRequest : IRequest<Result<PosteDto>>
+namespace Application.Features.Postes.Get;
+
+public record GetOnePasteByUrlRequest : IRequest<Result<PasteDto>>
 {
     public string? EncodedGuid { get; init; }
     public Guid UserId { get; init; }
@@ -14,58 +16,60 @@ public class GetOnePasteByUrlValidator : AbstractValidator<GetOnePasteByUrlReque
     }
 }
 
-public class GetOnePasteByUrlHandler : IRequestHandler<GetOnePasteByUrlRequest, Result<PosteDto>>
+public class GetOnePasteByUrlHandler : IRequestHandler<GetOnePasteByUrlRequest, Result<PasteDto>>
 {
     private readonly IPasteRepository _pasteRepository;
+    private readonly IPasteCloudService _pasteCloudService;
     private readonly ILogger<GetOnePasteByUrlHandler> _logger;
 
-    private const string PosteNotFoundMessega = "Poste not found";
+    private const string PasteNotFoundMessega = "Poste not found";
     private const string AccessDeniedMessega = "Access denied";
     private const string TextReceived = "Text received: {id}";
     private const string ErrorMessega = "An error occurred while receiving the text";
 
-    public GetOnePasteByUrlHandler(IPasteRepository posteRepository, ILogger<GetOnePasteByUrlHandler> logger)
+    public GetOnePasteByUrlHandler(IPasteRepository pasteRepository, ILogger<GetOnePasteByUrlHandler> logger, IPasteCloudService pasteCloudService)
     {
-        _pasteRepository = posteRepository ?? throw new ArgumentNullException(nameof(posteRepository));
+        _pasteRepository = pasteRepository ?? throw new ArgumentNullException(nameof(pasteRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _pasteCloudService = pasteCloudService ?? throw new ArgumentNullException(nameof(pasteCloudService));
     }
 
-    public async Task<Result<PosteDto>> Handle(GetOnePasteByUrlRequest request, CancellationToken cancellationToken)
+    public async Task<Result<PasteDto>> Handle(GetOnePasteByUrlRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            var posteId = _pasteRepository.GetDecodedGuid(request.EncodedGuid!);
+            var pasteId = _pasteRepository.GetDecodedGuid(request.EncodedGuid!);
 
-            var poste = await _pasteRepository.GetByIdAsync(posteId);
+            var paste = await _pasteRepository.GetByIdAsync(pasteId);
 
-            if (poste is null)
+            if (paste is null)
             {
-                _logger.LogWarning(PosteNotFoundMessega);
-                return Result.Fail(PosteNotFoundMessega);
+                _logger.LogWarning(PasteNotFoundMessega);
+                return Result.Fail(PasteNotFoundMessega);
             }
 
-            if (poste.IsPrivate && poste.UserId != request.UserId)
+            if (paste.IsPrivate && paste.UserId != request.UserId)
             {
                 _logger.LogWarning(AccessDeniedMessega);
-                return Result.Fail<PosteDto>(AccessDeniedMessega);
+                return Result.Fail<PasteDto>(AccessDeniedMessega);
             }
 
 
-            var text = await _pasteRepository.GetTextFromCloudAsync(poste.Url);
+            var text = await _pasteCloudService.GetTextFromCloudAsync(paste.Url);
 
-            var response = new PosteDto
+            var response = new PasteDto
             {
-                Id = poste.Id,
-                DateCreated = poste.DateCreated,
-                DeadLine = poste.DeadLine,
-                DisLikes = poste.DisLikes,
-                IsPrivate = poste.IsPrivate,
-                Likes = poste.Likes,
+                Id = paste.Id,
+                DateCreated = paste.DateCreated,
+                DeadLine = paste.DeadLine,
+                DisLikes = paste.DisLikes,
+                IsPrivate = paste.IsPrivate,
+                Likes = paste.Likes,
                 Text = text ?? string.Empty,
-                Title = poste.Title,
+                Title = paste.Title,
             };
 
-            _logger.LogInformation(TextReceived, poste.Id);
+            _logger.LogInformation(TextReceived, paste.Id);
 
             return Result.Ok(response);
         }

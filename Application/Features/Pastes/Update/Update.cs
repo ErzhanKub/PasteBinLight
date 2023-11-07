@@ -1,6 +1,8 @@
-﻿namespace Application.Features.Postes.Update;
+﻿using Domain.IServices;
 
-public class UpdatePasteByIdCommand : IRequest<Result<PosteDto>>
+namespace Application.Features.Postes.Update;
+
+public class UpdatePasteByIdCommand : IRequest<Result<PasteDto>>
 {
     public Guid UserId { get; set; }
     public Guid PosteId { get; init; }
@@ -10,9 +12,9 @@ public class UpdatePasteByIdCommand : IRequest<Result<PosteDto>>
     public DateTime DeadLine { get; init; }
 }
 
-public class UpdatePosteByIdvalidator : AbstractValidator<UpdatePasteByIdCommand>
+public class UpdatePasteByIdvalidator : AbstractValidator<UpdatePasteByIdCommand>
 {
-    public UpdatePosteByIdvalidator()
+    public UpdatePasteByIdvalidator()
     {
         RuleFor(u => u.UserId).NotEmpty();
         RuleFor(p => p.PosteId).NotEmpty();
@@ -22,27 +24,29 @@ public class UpdatePosteByIdvalidator : AbstractValidator<UpdatePasteByIdCommand
     }
 }
 
-public class UpdatePosteByIdHandler : IRequestHandler<UpdatePasteByIdCommand, Result<PosteDto>>
+public class UpdatePasteByIdHandler : IRequestHandler<UpdatePasteByIdCommand, Result<PasteDto>>
 {
-    private readonly IPasteRepository _posteRepository;
+    private readonly IPasteRepository _pasteRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IUserRepository _userRepository;
-    private readonly ILogger<UpdatePosteByIdHandler> _logger;
+    private readonly IPasteCloudService _pasteCloudService;
+    private readonly ILogger<UpdatePasteByIdHandler> _logger;
 
     private const string UserNotFoundMessega = "User is not found";
-    private const string PosteNotFoundMessega = "Poste is not found";
+    private const string PasteNotFoundMessega = "Poste is not found";
     private const string DataChangedMessage = "Data changed, poste: {id}";
     private const string ErrorMessega = "An error occurred while changing the text";
 
-    public UpdatePosteByIdHandler(IPasteRepository repository, IUnitOfWork unitOfWork, IUserRepository userRepository, ILogger<UpdatePosteByIdHandler> logger)
+    public UpdatePasteByIdHandler(IPasteRepository repository, IUnitOfWork unitOfWork, IUserRepository userRepository, ILogger<UpdatePasteByIdHandler> logger, IPasteCloudService pasteCloudService)
     {
-        _posteRepository = repository ?? throw new ArgumentNullException(nameof(repository));
+        _pasteRepository = repository ?? throw new ArgumentNullException(nameof(repository));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _userRepository = userRepository;
+        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _pasteCloudService = pasteCloudService ?? throw new ArgumentNullException(nameof(pasteCloudService));
     }
 
-    public async Task<Result<PosteDto>> Handle(UpdatePasteByIdCommand request, CancellationToken cancellationToken)
+    public async Task<Result<PasteDto>> Handle(UpdatePasteByIdCommand request, CancellationToken cancellationToken)
     {
         try
         {
@@ -53,35 +57,35 @@ public class UpdatePosteByIdHandler : IRequestHandler<UpdatePasteByIdCommand, Re
                 return Result.Fail(UserNotFoundMessega);
             }
 
-            var poste = user.Postes.FirstOrDefault(p => p.Id == request.PosteId);
+            var paste = user.Pastes.FirstOrDefault(p => p.Id == request.PosteId);
 
-            if (poste is null)
+            if (paste is null)
             {
-                _logger.LogWarning(PosteNotFoundMessega);
-                return Result.Fail(PosteNotFoundMessega);
+                _logger.LogWarning(PasteNotFoundMessega);
+                return Result.Fail(PasteNotFoundMessega);
             }
 
             if (request.Title is not null)
-                poste.Title = request.Title;
+                paste.Title = request.Title;
 
-            poste.DeadLine = request.DeadLine;
-            poste.IsPrivate = request.IsPrivate;
+            paste.DeadLine = request.DeadLine;
+            paste.IsPrivate = request.IsPrivate;
 
-            await _posteRepository.EditTextFromCloudeAsync(poste.Id.ToString(), request.Text ?? string.Empty);
+            await _pasteCloudService.EditTextFromCloudeAsync(paste.Id.ToString(), request.Text ?? string.Empty);
 
-            _posteRepository.Update(poste);
+            _pasteRepository.Update(paste);
             await _unitOfWork.SaveCommitAsync();
 
-            var response = new PosteDto
+            var response = new PasteDto
             {
-                Id = poste.Id,
+                Id = paste.Id,
                 DeadLine = request.DeadLine,
                 Text = request.Text ?? string.Empty,
                 Title = request.Title,
                 IsPrivate = request.IsPrivate,
             };
 
-            _logger.LogInformation(DataChangedMessage, poste.Id);
+            _logger.LogInformation(DataChangedMessage, paste.Id);
 
             return Result.Ok(response);
         }

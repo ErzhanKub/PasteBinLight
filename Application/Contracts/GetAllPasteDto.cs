@@ -1,6 +1,6 @@
 ﻿namespace Application.Contracts;
 
-public class GetAllPosteDto
+public class GetAllPasteDto
 {
     public Guid Id { get; init; }
     public string? Title { get; init; }

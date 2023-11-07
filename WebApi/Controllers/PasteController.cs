@@ -95,7 +95,7 @@ public class PasteController : ControllerBase
 
         var command = new DeletePasteByIdsCommand
         {
-            PosteId = id,
+            PasteId = id,
             UserId = UserServices.GetCurrentUserId(user)
         };
 
@@ -103,7 +103,7 @@ public class PasteController : ControllerBase
 
         if (result.IsSuccess)
         {
-            _logger.LogInformation("Deleted paste: {Id}", command.PosteId);
+            _logger.LogInformation("Deleted paste: {Id}", command.PasteId);
             return Ok(result.Value);
         }
         _logger.LogError("Failed to delete paste: {Reasons}", result.Reasons);

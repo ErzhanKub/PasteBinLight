@@ -1,34 +1,34 @@
 ﻿namespace Application.Features.Postes.Get;
 
-public record GetAllPastesForUserRequest : IRequest<Result<List<GetAllPosteDto>>>
+public record GetAllPastesForUserRequest : IRequest<Result<List<GetAllPasteDto>>>
 {
     public Guid UserId { get; init; }
 }
 
-public class GetAllPosteForUserRequestValidator : AbstractValidator<GetAllPastesForUserRequest>
+public class GetAllPasteForUserRequestValidator : AbstractValidator<GetAllPastesForUserRequest>
 {
-    public GetAllPosteForUserRequestValidator()
+    public GetAllPasteForUserRequestValidator()
     {
         RuleFor(u =>u.UserId).NotEmpty();
     }
 }
 
-public class GetAllPostsForUserHandler : IRequestHandler<GetAllPastesForUserRequest, Result<List<GetAllPosteDto>>>
+public class GetAllPastsForUserHandler : IRequestHandler<GetAllPastesForUserRequest, Result<List<GetAllPasteDto>>>
 {
     private readonly IUserRepository _userRepository;
-    private readonly ILogger<GetAllPostsForUserHandler> _logger;
+    private readonly ILogger<GetAllPastsForUserHandler> _logger;
 
     private const string UserNotFoundMessega = "User is not found";
     private const string ErrorMessega = "An error occurred while receiving poste from the user";
-    private const string PostesRecieved = "All poste from the user have been received, userId: {Id}";
+    private const string PastesRecieved = "All poste from the user have been received, userId: {Id}";
 
-    public GetAllPostsForUserHandler(IUserRepository userRepository, ILogger<GetAllPostsForUserHandler> logger)
+    public GetAllPastsForUserHandler(IUserRepository userRepository, ILogger<GetAllPastsForUserHandler> logger)
     {
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<List<GetAllPosteDto>>> Handle(GetAllPastesForUserRequest request, CancellationToken cancellationToken)
+    public async Task<Result<List<GetAllPasteDto>>> Handle(GetAllPastesForUserRequest request, CancellationToken cancellationToken)
     {
         try
         {
@@ -39,16 +39,16 @@ public class GetAllPostsForUserHandler : IRequestHandler<GetAllPastesForUserRequ
                 return Result.Fail(UserNotFoundMessega);
             }
 
-            var response = user.Postes.Select(poste => new GetAllPosteDto
+            var response = user.Pastes.Select(paste => new GetAllPasteDto
             {
                 Id = user.Id,
-                DateCreated = poste.DateCreated,
-                DisLikes = poste.DisLikes,
-                Likes = poste.Likes,
-                Title = poste.Title,
+                DateCreated = paste.DateCreated,
+                DisLikes = paste.DisLikes,
+                Likes = paste.Likes,
+                Title = paste.Title,
             }).ToList();
 
-            _logger.LogInformation(PostesRecieved, user.Id);
+            _logger.LogInformation(PastesRecieved, user.Id);
             return Result.Ok(response);
         }
         catch (Exception  ex)

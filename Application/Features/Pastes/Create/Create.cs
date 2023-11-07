@@ -1,4 +1,6 @@
-﻿namespace Application.Features.Postes.Create;
+﻿using Domain.IServices;
+
+namespace Application.Features.Postes.Create;
 
 public record CreatePasteCommand : IRequest<Result<string>>
 {
@@ -9,9 +11,9 @@ public record CreatePasteCommand : IRequest<Result<string>>
     public bool IsPrivate { get; init; }
 }
 
-public class CreatePosteCommandValidator : AbstractValidator<CreatePasteCommand>
+public class CreatePasteCommandValidator : AbstractValidator<CreatePasteCommand>
 {
-    public CreatePosteCommandValidator()
+    public CreatePasteCommandValidator()
     {
         RuleFor(u => u.UserId).NotEmpty();
         RuleFor(t => t.Text).NotEmpty().Length(1, 4000);
@@ -20,25 +22,27 @@ public class CreatePosteCommandValidator : AbstractValidator<CreatePasteCommand>
     }
 }
 
-public sealed class CreatePosteHandler : IRequestHandler<CreatePasteCommand, Result<string>>
+public sealed class CreatePasteHandler : IRequestHandler<CreatePasteCommand, Result<string>>
 {
     private readonly IUserRepository _userRepository;
-    private readonly IPasteRepository _posteRepository;
+    private readonly IPasteRepository _pasteRepository;
+    private readonly IPasteCloudService _pasteCloudService;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<CreatePosteHandler> _logger;
+    private readonly ILogger<CreatePasteHandler> _logger;
     
     private const string UserNotFoundMessage = "User not found";
     private const string LoadingTextMessage = "Loading text into the cloud database: {Id}";
-    private const string AddedPosteMessage = "Added poste to user";
-    private const string PosteSavedMessage = "Poste saved to local database, posteId: {posteId}; userId: {userId}";
+    private const string AddedPasteMessage = "Added poste to user";
+    private const string PasteSavedMessage = "Poste saved to local database, posteId: {posteId}; userId: {userId}";
     private const string ErrorMessage = "An error occurred during poste creation";
 
-    public CreatePosteHandler(IUserRepository userRepository, IPasteRepository posteRepository, IUnitOfWork unitOfWork, ILogger<CreatePosteHandler> logger)
+    public CreatePasteHandler(IUserRepository userRepository, IPasteRepository pasteRepository, IUnitOfWork unitOfWork, ILogger<CreatePasteHandler> logger, IPasteCloudService pasteCloudService)
     {
         _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        _posteRepository = posteRepository ?? throw new ArgumentNullException(nameof(posteRepository));
+        _pasteRepository = pasteRepository ?? throw new ArgumentNullException(nameof(pasteRepository));
         _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _pasteCloudService = pasteCloudService ?? throw new ArgumentNullException(nameof(pasteCloudService));
     }
 
     public async Task<Result<string>> Handle(CreatePasteCommand request, CancellationToken cancellationToken)
@@ -53,15 +57,15 @@ public sealed class CreatePosteHandler : IRequestHandler<CreatePasteCommand, Res
                 return Result.Fail(UserNotFoundMessage);
             }
 
-            var posteId = Guid.NewGuid();
+            var pasteId = Guid.NewGuid();
 
-            var urlCloud = await _posteRepository.UploadTextToCloudAsync(posteId.ToString(), request.Text);
+            var urlCloud = await _pasteCloudService.UploadTextToCloudAsync(pasteId.ToString(), request.Text);
 
-            _logger.LogInformation(LoadingTextMessage, posteId);
+            _logger.LogInformation(LoadingTextMessage, pasteId);
 
-            var poste = new Poste
+            var paste = new Paste
             {
-                Id = posteId,
+                Id = pasteId,
                 DateCreated = DateTime.Now,
                 DeadLine = request.DeadLine,
                 IsPrivate = request.IsPrivate,
@@ -71,17 +75,17 @@ public sealed class CreatePosteHandler : IRequestHandler<CreatePasteCommand, Res
                 UserId = user.Id,
             };
 
-            user.AddPoste(poste);
-            _logger.LogInformation(AddedPosteMessage);
+            user.AddPaste(paste);
+            _logger.LogInformation(AddedPasteMessage);
 
-            var guid = await _posteRepository.CreateAsync(poste);
+            var guid = await _pasteRepository.CreateAsync(paste);
 
             _userRepository.Update(user);
 
             await _unitOfWork.SaveCommitAsync();
-            _logger.LogInformation(PosteSavedMessage, poste.Id, user.Id);
+            _logger.LogInformation(PasteSavedMessage, paste.Id, user.Id);
 
-            var encodedGuid = _posteRepository.GetEncodedGuid(guid);
+            var encodedGuid = _pasteRepository.GetEncodedGuid(guid);
 
             return Result.Ok(encodedGuid);
         }

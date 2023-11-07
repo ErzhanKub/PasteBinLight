@@ -1,41 +1,41 @@
 ﻿namespace Application.Features.Postes.Get;
 
-public record GetAllPasteRequest : IRequest<Result<List<GetAllPosteDto>>> { }
-public class GetAllPosteRequestValidator : AbstractValidator<GetAllPasteRequest>
+public record GetAllPasteRequest : IRequest<Result<List<GetAllPasteDto>>> { }
+public class GetAllPasteRequestValidator : AbstractValidator<GetAllPasteRequest>
 {
-    public GetAllPosteRequestValidator() { }
+    public GetAllPasteRequestValidator() { }
 }
-public class GetAllPosteHandler : IRequestHandler<GetAllPasteRequest, Result<List<GetAllPosteDto>>>
+public class GetAllPasteHandler : IRequestHandler<GetAllPasteRequest, Result<List<GetAllPasteDto>>>
 {
-    private readonly IPasteRepository _posteRepository;
-    private readonly ILogger<GetAllPosteHandler> _logger;
+    private readonly IPasteRepository _pasteRepository;
+    private readonly ILogger<GetAllPasteHandler> _logger;
 
-    private const string PosteReceivedMessega = "Received all public poste";
+    private const string PasteReceivedMessega = "Received all public poste";
     private const string ErrorMessega = "An error occurred while receiving mail";
 
-    public GetAllPosteHandler(IPasteRepository posteRepository, ILogger<GetAllPosteHandler> logger)
+    public GetAllPasteHandler(IPasteRepository pasteRepository, ILogger<GetAllPasteHandler> logger)
     {
-        _posteRepository = posteRepository ?? throw new ArgumentNullException(nameof(posteRepository));
+        _pasteRepository = pasteRepository ?? throw new ArgumentNullException(nameof(pasteRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<List<GetAllPosteDto>>> Handle(GetAllPasteRequest request, CancellationToken cancellationToken)
+    public async Task<Result<List<GetAllPasteDto>>> Handle(GetAllPasteRequest request, CancellationToken cancellationToken)
     {
         try
         {
-            var allPostes = await _posteRepository.GetAllAsync();
-            var publicPostes = allPostes.Where(p => p.IsPrivate != true).ToList();
+            var allPastes = await _pasteRepository.GetAllAsync();
+            var publicPostes = allPastes.Where(p => p.IsPrivate != true).ToList();
 
-            var response = publicPostes.Select(poste => new GetAllPosteDto
+            var response = publicPostes.Select(paste => new GetAllPasteDto
             {
-                Id = poste.Id,
-                DateCreated = poste.DateCreated,
-                DisLikes = poste.DisLikes,
-                Likes = poste.Likes,
-                Title = poste.Title,
+                Id = paste.Id,
+                DateCreated = paste.DateCreated,
+                DisLikes = paste.DisLikes,
+                Likes = paste.Likes,
+                Title = paste.Title,
             }).ToList();
 
-            _logger.LogInformation(PosteReceivedMessega);
+            _logger.LogInformation(PasteReceivedMessega);
 
             return Result.Ok(response);
         }
