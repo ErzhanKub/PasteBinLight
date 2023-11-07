@@ -5,7 +5,7 @@ using Domain.IServices;
 
 namespace Infrastructure.Services;
 
-public class PasteCloudService : IPasteCloudService
+public class RecordCloudService : IRecordCloudService
 {
     public const string bucketName = "basketforfinalproject";
     public const string accessKey = "AKIARQAYJTSFMJZ3APWV";

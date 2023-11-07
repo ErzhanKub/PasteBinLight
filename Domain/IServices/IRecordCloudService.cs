@@ -1,6 +1,6 @@
 ﻿namespace Domain.IServices;
 
-public interface IPasteCloudService
+public interface IRecordCloudService
 {
     public Task<string> UploadTextToCloudAsync(string key, string text);
     public Task<string> GetTextFromCloudAsync(Uri url);

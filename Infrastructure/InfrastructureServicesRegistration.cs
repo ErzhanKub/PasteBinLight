@@ -22,8 +22,8 @@ public static class InfrastructureServicesRegistration
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IPasteRepository, PasteRepository>();
-        services.AddScoped<IPasteCloudService, PasteCloudService>();
+        services.AddScoped<IRecordRepository, RecordRepository>();
+        services.AddScoped<IRecordCloudService, RecordCloudService>();
 
         return services;
     }

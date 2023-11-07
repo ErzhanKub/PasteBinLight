@@ -5,16 +5,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
-public class PasteRepository : IPasteRepository
+public class RecordRepository : IRecordRepository
 {
     private readonly AppDbContext _dbcontext;
 
-    public PasteRepository(AppDbContext dbcontext)
+    public RecordRepository(AppDbContext dbcontext)
     {
         _dbcontext = dbcontext;
     }
 
-    public async Task<Guid> CreateAsync(Paste entity)
+    public async Task<Guid> CreateAsync(Record entity)
     {
         await _dbcontext.Postes.AddAsync(entity);
         return entity.Id;
@@ -27,7 +27,7 @@ public class PasteRepository : IPasteRepository
         return Task.FromResult(ids);
     }
 
-    public async Task<Paste?> GetByIdAsync(Guid id)
+    public async Task<Record?> GetByIdAsync(Guid id)
     {
         var poste = await _dbcontext.Postes.FirstOrDefaultAsync(p => p.Id == id);
         return poste;
@@ -47,12 +47,12 @@ public class PasteRepository : IPasteRepository
         return base64Guid;
     }
 
-    public void Update(Paste entity)
+    public void Update(Record entity)
     {
         _dbcontext.Postes.Update(entity);
     }
 
-    public async Task<IReadOnlyList<Paste>> GetAllAsync()
+    public async Task<IReadOnlyList<Record>> GetAllAsync()
     {
         return await _dbcontext.Postes.AsNoTracking().ToListAsync();
     }
