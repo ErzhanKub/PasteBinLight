@@ -20,7 +20,7 @@ public static class InfrastructureServicesRegistration
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IPasteRepository, PosteRepository>();
+        services.AddScoped<IPasteRepository, PasteRepository>();
 
         return services;
     }

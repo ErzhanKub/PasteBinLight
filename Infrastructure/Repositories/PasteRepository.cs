@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
-public class PosteRepository : IPasteRepository
+public class PasteRepository : IPasteRepository
 {
     public const string bucketName = "basketforfinalproject";
     public const string accessKey = "AKIARQAYJTSFMJZ3APWV";
@@ -16,7 +16,7 @@ public class PosteRepository : IPasteRepository
 
     private readonly AppDbContext _dbcontext;
 
-    public PosteRepository(AppDbContext dbcontext)
+    public PasteRepository(AppDbContext dbcontext)
     {
         _dbcontext = dbcontext;
     }
