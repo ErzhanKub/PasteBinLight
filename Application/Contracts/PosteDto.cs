@@ -1,6 +1,6 @@
 ﻿namespace Application.Contracts;
 
-public record PasteDto
+public record PosteDto
 {
     public Guid Id { get; set; }
     public required string Text { get; set; }

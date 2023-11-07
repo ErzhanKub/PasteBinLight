@@ -1,6 +1,6 @@
 ﻿namespace Application.Features.Postes.Get;
 
-public record GetOnePasteByUrlRequest : IRequest<Result<PasteDto>>
+public record GetOnePasteByUrlRequest : IRequest<Result<PosteDto>>
 {
     public string? EncodedGuid { get; init; }
     public Guid UserId { get; init; }
@@ -14,7 +14,7 @@ public class GetOnePasteByUrlValidator : AbstractValidator<GetOnePasteByUrlReque
     }
 }
 
-public class GetOnePasteByUrlHandler : IRequestHandler<GetOnePasteByUrlRequest, Result<PasteDto>>
+public class GetOnePasteByUrlHandler : IRequestHandler<GetOnePasteByUrlRequest, Result<PosteDto>>
 {
     private readonly IPasteRepository _pasteRepository;
     private readonly ILogger<GetOnePasteByUrlHandler> _logger;
@@ -30,7 +30,7 @@ public class GetOnePasteByUrlHandler : IRequestHandler<GetOnePasteByUrlRequest, 
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<PasteDto>> Handle(GetOnePasteByUrlRequest request, CancellationToken cancellationToken)
+    public async Task<Result<PosteDto>> Handle(GetOnePasteByUrlRequest request, CancellationToken cancellationToken)
     {
         try
         {
@@ -47,13 +47,13 @@ public class GetOnePasteByUrlHandler : IRequestHandler<GetOnePasteByUrlRequest, 
             if (poste.IsPrivate && poste.UserId != request.UserId)
             {
                 _logger.LogWarning(AccessDeniedMessega);
-                return Result.Fail<PasteDto>(AccessDeniedMessega);
+                return Result.Fail<PosteDto>(AccessDeniedMessega);
             }
 
 
             var text = await _pasteRepository.GetTextFromCloudAsync(poste.Url);
 
-            var response = new PasteDto
+            var response = new PosteDto
             {
                 Id = poste.Id,
                 DateCreated = poste.DateCreated,

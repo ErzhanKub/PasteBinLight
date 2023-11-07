@@ -1,6 +1,5 @@
 ﻿using Application;
 using Infrastructure;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;

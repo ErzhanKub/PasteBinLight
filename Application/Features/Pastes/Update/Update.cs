@@ -1,6 +1,6 @@
 ﻿namespace Application.Features.Postes.Update;
 
-public class UpdatePasteByIdCommand : IRequest<Result<PasteDto>>
+public class UpdatePasteByIdCommand : IRequest<Result<PosteDto>>
 {
     public Guid UserId { get; set; }
     public Guid PosteId { get; init; }
@@ -22,7 +22,7 @@ public class UpdatePosteByIdvalidator : AbstractValidator<UpdatePasteByIdCommand
     }
 }
 
-public class UpdatePosteByIdHandler : IRequestHandler<UpdatePasteByIdCommand, Result<PasteDto>>
+public class UpdatePosteByIdHandler : IRequestHandler<UpdatePasteByIdCommand, Result<PosteDto>>
 {
     private readonly IPasteRepository _posteRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -42,7 +42,7 @@ public class UpdatePosteByIdHandler : IRequestHandler<UpdatePasteByIdCommand, Re
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<PasteDto>> Handle(UpdatePasteByIdCommand request, CancellationToken cancellationToken)
+    public async Task<Result<PosteDto>> Handle(UpdatePasteByIdCommand request, CancellationToken cancellationToken)
     {
         try
         {
@@ -72,7 +72,7 @@ public class UpdatePosteByIdHandler : IRequestHandler<UpdatePasteByIdCommand, Re
             _posteRepository.Update(poste);
             await _unitOfWork.SaveCommitAsync();
 
-            var response = new PasteDto
+            var response = new PosteDto
             {
                 Id = poste.Id,
                 DeadLine = request.DeadLine,
