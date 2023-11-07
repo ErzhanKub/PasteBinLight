@@ -29,10 +29,18 @@ public class PosteController : ControllerBase
     [SwaggerOperation(Summary = "Создает новую запись.")]
     [SwaggerResponse(StatusCodes.Status201Created, "Poste Created Successfully")]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid Request", typeof(ValidationProblemDetails))]
-    public async Task<IActionResult> CreatePoste(CreatePosteCommand command)
+    public async Task<IActionResult> CreatePoste(string? title, string text, DateTime deadline, bool isPrivate)
     {
         var currentUser = HttpContext.User;
-        command.UserId = UserServices.GetCurrentUserId(currentUser);
+
+        var command = new CreatePosteCommand
+        {
+            UserId = UserServices.GetCurrentUserId(currentUser),
+            Title = title,
+            Text = text,
+            DeadLine = deadline,
+            IsPrivate = isPrivate
+        };
 
         var response = await _mediator.Send(command);
         if (response.IsFailed)
@@ -48,14 +56,13 @@ public class PosteController : ControllerBase
     [HttpGet("{encodedGuid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [SwaggerOperation(Summary = "Получает запись по кодированному GUID.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Poste Retrieved Successfully")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Poste Not Found", typeof(ValidationProblemDetails))]
     public async Task<IActionResult> GetPoste(string encodedGuid)
     {
         var currentUser = HttpContext.User;
-
-        //string decodedToken = HttpUtility.UrlDecode(encodedGuid);
 
         var request = new GetOnePosteByUrlRequest
         {
@@ -77,6 +84,7 @@ public class PosteController : ControllerBase
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     [SwaggerOperation(Summary = "Удаляет запись по ID.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Poste Deleted Successfully")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Poste Not Found", typeof(ValidationProblemDetails))]
@@ -118,5 +126,33 @@ public class PosteController : ControllerBase
         }
         _logger.LogError("Failed to retrieve all postes: {Reasons}", result.Reasons);
         return NotFound(result.Reasons);
+    }
+
+    [HttpGet("{Id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    [SwaggerOperation(Summary = "Получает запись по ID.")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Paste Retrieved Successfully")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Paste Not Found", typeof(ValidationProblemDetails))]
+    public async Task<IActionResult> GetPasteById(Guid id)
+    {
+        var currentUser = HttpContext.User;
+
+        var request = new GetPasteByIdRequest
+        {
+            PasteId = id,
+            UserId = UserServices.GetCurrentUserId(currentUser)
+        };
+
+        var response = await _mediator.Send(request);
+        if (response.IsSuccess)
+        {
+            _logger.LogInformation("Retrieved paste: {Id}", response.Value.Id);
+            return Ok(response.Value);
+        }
+
+        _logger.LogError("Failed to retrieve paste: {Reasons}", response.Reasons);
+        return NotFound(response.Reasons);
     }
 }
