@@ -61,7 +61,7 @@ public class RecordController : ControllerBase
         return Created(recordUrl, new { Url = recordUrl, QRCode = qrCode });
     }
 
-    [HttpGet("{encodedGuid}")]
+    [HttpGet("encoded/{encodedGuid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -89,26 +89,26 @@ public class RecordController : ControllerBase
         return NotFound(response.Reasons);
     }
 
-    [HttpGet("allForAdmin")]
+    [HttpGet("publicRecord")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(Summary = "Получает все записи.")]
+    [SwaggerOperation(Summary = "Получает все публичные записи.")]
     [SwaggerResponse(StatusCodes.Status200OK, "All Records Retrieved Successfully")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Records Not Found", typeof(ValidationProblemDetails))]
-    public async Task<IActionResult> GetAllRecords()
+    public async Task<IActionResult> GetAllPublicRecords()
     {
-        var request = new GetAllRecordsRequest();
+        var request = new GetAllPublicRecordsRequest();
         var result = await _mediator.Send(request);
         if (result.IsSuccess)
         {
-            _logger.LogInformation("Retrieved all records");
+            _logger.LogInformation("Retrieved all public records");
             return Ok(result.Value);
         }
-        _logger.LogError("Failed to retrieve all records: {Reasons}", result.Reasons);
+        _logger.LogError("Failed to retrieve all public records: {Reasons}", result.Reasons);
         return NotFound(result.Reasons);
     }
 
-    [HttpGet("all")]
+    [HttpGet("recordCurrentUser")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Получение своих записей.")]
@@ -180,7 +180,7 @@ public class RecordController : ControllerBase
         return NotFound(result.Reasons);
     }
 
-    [HttpPatch]
+    [HttpPut]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Изменение записи по ID.")]

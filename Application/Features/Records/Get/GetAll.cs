@@ -1,25 +1,25 @@
 ﻿namespace Application.Features.Records.Get;
 
-public record GetAllRecordsRequest : IRequest<Result<List<GetAllRecordsDto>>> { }
-public class GetAllRecordsRequestValidator : AbstractValidator<GetAllRecordsRequest>
+public record GetAllPublicRecordsRequest : IRequest<Result<List<GetAllRecordsDto>>> { }
+public class GetAllPublicRecordsRequestValidator : AbstractValidator<GetAllPublicRecordsRequest>
 {
-    public GetAllRecordsRequestValidator() { }
+    public GetAllPublicRecordsRequestValidator() { }
 }
-public class GetAllRecordsHandler : IRequestHandler<GetAllRecordsRequest, Result<List<GetAllRecordsDto>>>
+public class GetAllPublicRecordsHandler : IRequestHandler<GetAllPublicRecordsRequest, Result<List<GetAllRecordsDto>>>
 {
     private readonly IRecordRepository _recordRepository;
-    private readonly ILogger<GetAllRecordsHandler> _logger;
+    private readonly ILogger<GetAllPublicRecordsHandler> _logger;
 
     private const string RecordReceivedMessega = "Received all public record";
     private const string ErrorMessega = "An error occurred while receiving mail";
 
-    public GetAllRecordsHandler(IRecordRepository recordRepository, ILogger<GetAllRecordsHandler> logger)
+    public GetAllPublicRecordsHandler(IRecordRepository recordRepository, ILogger<GetAllPublicRecordsHandler> logger)
     {
         _recordRepository = recordRepository ?? throw new ArgumentNullException(nameof(recordRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public async Task<Result<List<GetAllRecordsDto>>> Handle(GetAllRecordsRequest request, CancellationToken cancellationToken)
+    public async Task<Result<List<GetAllRecordsDto>>> Handle(GetAllPublicRecordsRequest request, CancellationToken cancellationToken)
     {
         try
         {
