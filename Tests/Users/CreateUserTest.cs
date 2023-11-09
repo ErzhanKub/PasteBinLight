@@ -9,25 +9,31 @@ public class CreateUserTest
 {
     private readonly Mock<IUserRepository> _userRepositoryMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly Mock<ILogger<CreateUserCommandHandler>> _loggerMock;
 
     public CreateUserTest()
     {
         _userRepositoryMock = new Mock<IUserRepository>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _loggerMock = new Mock<ILogger<CreateUserCommandHandler>>();
     }
 
     [Fact]
     public async Task Handle_ValidCommand_ShouldCreateUser()
     {
+        var test = _userRepositoryMock.Object.HashPassword("password123");
+        var a = new Password("password123");
+        var b = a.Value;
+
         // Arrange
         var command = new CreateUserCommand
         {
             Username = "Test",
             Email = "test.user@example.com",
-            Password = "password123",
+            Password = b
         };
 
-        var handler = new CreateUserCommandHandler(_userRepositoryMock.Object, _unitOfWorkMock.Object);
+        var handler = new CreateUserCommandHandler(_userRepositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object);
 
         // Act
         var result = await handler.Handle(command, default);

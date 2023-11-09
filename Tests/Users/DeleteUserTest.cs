@@ -10,11 +10,13 @@ namespace Tests.Users
 
         private readonly Mock<IUserRepository> _userRepositoryMock;
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+        private readonly Mock<ILogger<DeleteUsersByIdsHandler>> _loggerMock;
 
         public DeleteUserTest()
         {
             _userRepositoryMock = new Mock<IUserRepository>();
             _unitOfWorkMock = new Mock<IUnitOfWork>();
+            _loggerMock = new Mock<ILogger<DeleteUsersByIdsHandler>>();
         }
 
         [Fact]
@@ -25,7 +27,7 @@ namespace Tests.Users
             {
                 Id = new Guid[] { Guid.NewGuid() }
             };
-            var handler = new DeleteUsersByIdsHandler(_userRepositoryMock.Object, _unitOfWorkMock.Object);
+            var handler = new DeleteUsersByIdsHandler(_userRepositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object);
 
             _userRepositoryMock.Setup(x => x.DeleteRangeAsync(It.IsAny<Guid[]>()))
                 .ReturnsAsync(command.Id);
