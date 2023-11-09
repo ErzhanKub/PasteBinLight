@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231107144438_Test1")]
-    partial class Test1
+    [Migration("20231109174846_AddEntities")]
+    partial class AddEntities
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -60,20 +60,20 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Postes");
+                    b.ToTable("Records");
 
                     b.HasData(
                         new
                         {
-                            Id = new Guid("90c5b3b2-8a8d-44cf-ab9b-306dd828c465"),
-                            DateCreated = new DateTime(2023, 11, 7, 20, 44, 38, 91, DateTimeKind.Local).AddTicks(7317),
-                            DeadLine = new DateTime(2023, 12, 7, 20, 44, 38, 91, DateTimeKind.Local).AddTicks(7327),
+                            Id = new Guid("22f1f883-46c5-4572-81e8-dbf19c74c12f"),
+                            DateCreated = new DateTime(2023, 11, 9, 23, 48, 46, 223, DateTimeKind.Local).AddTicks(168),
+                            DeadLine = new DateTime(2023, 12, 9, 23, 48, 46, 223, DateTimeKind.Local).AddTicks(184),
                             DisLikes = 13L,
                             IsPrivate = false,
                             Likes = 183L,
                             Title = "My day",
                             Url = "https://www.youtube.com/",
-                            UserId = new Guid("323c8e8b-8e44-47bf-89ce-e8af73c8007d")
+                            UserId = new Guid("ad420878-46b9-4626-b647-c468a7dadaa6")
                         });
                 });
 
@@ -112,7 +112,7 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("323c8e8b-8e44-47bf-89ce-e8af73c8007d"),
+                            Id = new Guid("ad420878-46b9-4626-b647-c468a7dadaa6"),
                             ConfirmationToken = "ConfirmToken",
                             Email = "string@mail.com",
                             Password = "b4923143305b8c19f5c5031c406be92b99ce221e00c795598356d9fc0fc117bc",

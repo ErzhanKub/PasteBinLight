@@ -1,19 +1,30 @@
-﻿namespace Domain.Abstractions;
-
-public abstract class BaseEntity
+﻿namespace Domain.Abstractions
 {
-    private readonly List<IDomainEvent> _events = new();
-    protected BaseEntity(Guid id)
+    // Abstract base class for entities
+    public abstract class BaseEntity
     {
-        Id = id;
+        // List of domain events
+        private readonly List<IDomainEvent> _domainEvents = new();
+
+        // Constructor
+        protected BaseEntity(Guid id)
+        {
+            Id = id;
+        }
+
+        // Unique identifier
+        public Guid Id { get; init; }
+
+        // Domain events associated with this entity
+        public List<IDomainEvent> DomainEvents => _domainEvents.ToList();
+
+        // Method to raise a new domain event
+        protected void RaiseDomainEvent(IDomainEvent domainEvent)
+        {
+            DomainEvents.Add(domainEvent);
+        }
     }
 
-    public Guid Id { get; init; }
-    public List<IDomainEvent> Events => _events.ToList();
-    protected void Raise(IDomainEvent domainEvent)
-    {
-        Events.Add(domainEvent);
-    }
+    // Interface for domain events
+    public interface IDomainEvent { }
 }
-
-public interface IDomainEvent { }

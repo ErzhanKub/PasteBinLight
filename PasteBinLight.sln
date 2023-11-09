@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{48ECCF02-5CD3-4E23-9865-ED6A36916B31}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "Domain\Domain.csproj", "{48ECCF02-5CD3-4E23-9865-ED6A36916B31}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Application\Application.csproj", "{7BCDB68F-0991-4E49-B260-053D337A5C7B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application", "Application\Application.csproj", "{7BCDB68F-0991-4E49-B260-053D337A5C7B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{1141ED0C-35E9-47F8-8B95-C40E5B7D2A45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Infrastructure\Infrastructure.csproj", "{1141ED0C-35E9-47F8-8B95-C40E5B7D2A45}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApi", "WebApi\WebApi.csproj", "{6B6B8ABE-5F4B-49A7-8BD4-211365E26CD1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApi", "WebApi\WebApi.csproj", "{6B6B8ABE-5F4B-49A7-8BD4-211365E26CD1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{F4E578E2-47F1-41DB-846C-E32138F31D04}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,6 +38,12 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{48ECCF02-5CD3-4E23-9865-ED6A36916B31} = {F4E578E2-47F1-41DB-846C-E32138F31D04}
+		{7BCDB68F-0991-4E49-B260-053D337A5C7B} = {F4E578E2-47F1-41DB-846C-E32138F31D04}
+		{1141ED0C-35E9-47F8-8B95-C40E5B7D2A45} = {F4E578E2-47F1-41DB-846C-E32138F31D04}
+		{6B6B8ABE-5F4B-49A7-8BD4-211365E26CD1} = {F4E578E2-47F1-41DB-846C-E32138F31D04}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {642C2E60-BDD8-45AB-9C60-A9F3B40EF54F}

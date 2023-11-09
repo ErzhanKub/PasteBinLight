@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace Infrastructure.Repositories;
 
-public class UserRepository : IUserRepository
+public sealed class UserRepository : IUserRepository
 {
     private readonly AppDbContext _dbcontext;
     private const string apiKey = "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";
@@ -17,42 +17,43 @@ public class UserRepository : IUserRepository
         _dbcontext = dbcontext;
     }
 
-    public async Task<User?> CheckUserCredentialsAsync(string username, string password)
+    // Check if user credentials are valid
+    public async Task<User?> ValidateUserCredentialsAsync(string username, string password)
     {
         var hashedPassword = HashPassword(password);
 
-        //Могут возникнуть проблемы с производительностью!
+        // Fetch users from database
         var users = await _dbcontext.Users.ToListAsync();
 
+        // Find user with matching username and password
         var user = users.FirstOrDefault(u => u.Username.Value == username && u.Password.Value == hashedPassword);
 
         return user;
     }
 
-    public async Task<Guid> CreateAsync(User entity)
+    // Create a new user
+    public async Task<Guid> CreateAsync(User entity, CancellationToken cancellationToken)
     {
-        await _dbcontext.Users.AddAsync(entity);
+        await _dbcontext.Users.AddAsync(entity, cancellationToken);
         return entity.Id;
     }
 
-    public Task<Guid[]> DeleteByIdAsync(params Guid[] ids)
+    // Remove users by their IDs
+    public Task<Guid[]> RemoveByIdAsync(params Guid[] ids)
     {
         var userToDelete = _dbcontext.Users.Where(u => ids.Contains(u.Id));
         _dbcontext.Users.RemoveRange(userToDelete);
         return Task.FromResult(ids);
     }
 
-    public async Task<IReadOnlyList<User>> GetAllAsync()
+    // Fetch a user by their ID
+    public async Task<User?> FetchByIdAsync(Guid id, CancellationToken cancellationToken)
     {
-        return await _dbcontext.Users.AsNoTracking().ToListAsync();
-    }
-
-    public async Task<User?> GetByIdAsync(Guid id)
-    {
-        var user = await _dbcontext.Users.FirstOrDefaultAsync(u => u.Id == id);
+        var user = await _dbcontext.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
         return user;
     }
 
+    // Hash a password
     public string HashPassword(string password)
     {
         var hashedBytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
@@ -60,7 +61,8 @@ public class UserRepository : IUserRepository
         return hash;
     }
 
-    public async Task SendEmail(string userEmail, string token)
+    // Send an email
+    public async Task SendEmailAsync(string userEmail, string token)
     {
         var client = new HttpClient();
         var request = new HttpRequestMessage
@@ -68,13 +70,13 @@ public class UserRepository : IUserRepository
             Method = HttpMethod.Post,
             RequestUri = new Uri("https://api.brevo.com/v3/smtp/email"),
             Headers =
-            {       
+            {
                 { "accept", "application/json" },
                 { "api-key", apiKey },
             },
             Content = new StringContent(JsonConvert.SerializeObject(new
             {
-                sender = new { name = "ErzhanKub", email = "avazov.erjan@gmail.com" },
+                sender = new { name = "Erzhan Kubanchbek uulu", email = "avazov.erjan@gmail.com" },
                 to = new[] { new { email = userEmail } },
                 subject = "Email confirmation",
                 textContent = $"Thank you for registering! Please confirm your email by clicking on the following link: https://localhost:7056/api/User/{token}"
@@ -89,11 +91,13 @@ public class UserRepository : IUserRepository
         }
     }
 
+    // Update a user
     public void Update(User entity)
     {
         _dbcontext.Users.Update(entity);
     }
 
+    // Generate an email confirmation token
     public string GenerateEmailConfirmationToken()
     {
         byte[] tokenData = new byte[32];
@@ -102,7 +106,8 @@ public class UserRepository : IUserRepository
         return Convert.ToBase64String(tokenData);
     }
 
-    public async Task<string> DeleteUserByUsernameAsync(string username)
+    // Delete a user by their username
+    public async Task<string> RemoveUserByUsernameAsync(string username)
     {
         var user = _dbcontext.Users.SingleOrDefault(u => u.Username != null && u.Username.Value == username);
         if (user != null)
@@ -113,9 +118,20 @@ public class UserRepository : IUserRepository
         return username;
     }
 
-    public async Task<User?> GetByUsernameAsync(string username)
+    // Fetch a user by their username
+    public async Task<User?> FetchUserByUsernameAsync(string username, CancellationToken cancellationToken)
     {
-        var user = await _dbcontext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username.ToString() == username);
+        var user = await _dbcontext.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Username.ToString() == username, cancellationToken);
         return user;
+    }
+
+    // Fetch all users with pagination
+    public async Task<IReadOnlyList<User>> GetAllAsync(int pageNumber, int pageSize, CancellationToken cancellationToken)
+    {
+        return await _dbcontext.Users
+            .AsNoTracking()
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
     }
 }

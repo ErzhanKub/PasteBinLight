@@ -1,26 +1,35 @@
-﻿using Application.Features.Users.Create;
+﻿// Importing the required libraries
+using Application.Features.Users.Create;
 using Application.Pipelines;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 
-namespace Application;
-
-public static class ApplicationServicesRegistration
+// Namespace for the application
+namespace Application
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services)
+    // Static class for registering application services
+    public static class ApplicationServicesRegistration
     {
-        services.AddLogging();
+        // Extension method for IServiceCollection
+        public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+        {
+            // Add logging services
+            services.AddLogging();
 
-        services.AddMediatR(config => config.RegisterServicesFromAssemblies(
+            // Add MediatR services and register services from the current assembly
+            services.AddMediatR(config => config.RegisterServicesFromAssemblies(
                    Assembly.GetExecutingAssembly()));
 
-        services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);
+            // Add validators from the assembly of CreateUserCommandValidator
+            services.AddValidatorsFromAssembly(typeof(CreateUserCommandValidator).Assembly);
 
-        services.AddTransient(
-           typeof(IPipelineBehavior<,>),
-           typeof(ValidationPipeline<,>));
+            // Add transient service for the validation pipeline
+            services.AddTransient(
+               typeof(IPipelineBehavior<,>),
+               typeof(RequestValidationPipeline<,>));
 
-
-        return services;
+            // Return the service collection
+            return services;
+        }
     }
 }

@@ -1,17 +1,24 @@
-﻿namespace Domain.Entities;
-
-public sealed record Username
+﻿namespace Domain.Entities
 {
-    private Username() { Value = null!; }
-    public Username(string? name)
+    // Immutable record type for Username
+    public sealed record Username
     {
-        if (string.IsNullOrWhiteSpace(name))
-            throw new ArgumentNullException(nameof(name), "Value is required");
+        // Private constructor for EF Core
+        private Username() { Value = null!; }
 
-        if (name.Length > 200)
-            throw new ArgumentException("Value is too long", nameof(name));
+        // Public constructor with username validation
+        public Username(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentNullException(nameof(name), "Username value is required");
 
-        Value = name;
+            if (name.Length > 200)
+                throw new ArgumentException("Username value is too long", nameof(name));
+
+            Value = name;
+        }
+
+        // Username value
+        public string Value { get; }
     }
-    public string Value { get; }
 }

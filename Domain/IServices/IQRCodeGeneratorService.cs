@@ -1,6 +1,9 @@
-﻿namespace Domain.IServices;
-
-public interface IQRCodeGeneratorService
+﻿namespace Domain.IServices
 {
-    string GeneratorQRCode(string text);
+    // Interface for a service that generates QR codes
+    public interface IQRCodeGeneratorService
+    {
+        // Generate a QR code from a text string
+        string GenerateQRCodeFromText(string text);
+    }
 }

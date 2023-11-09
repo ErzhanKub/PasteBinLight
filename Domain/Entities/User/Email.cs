@@ -1,28 +1,38 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Domain.Entities;
-
-public sealed record Email
+namespace Domain.Entities
 {
-    private static readonly Regex EmailRegex = new(@"^\w+([-+.']\w*)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$", RegexOptions.Compiled);
-    private Email() { Value = null!; }
-    public Email(string? input, bool emailConfirmed)
+    // Immutable record type for Email
+    public sealed record Email
     {
-        if (string.IsNullOrWhiteSpace(input))
-            throw new ArgumentNullException(nameof(input), "Value is required");
+        // Regular expression for email validation
+        private static readonly Regex EmailValidationRegex = new(@"^\w+([-+.']\w*)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$", RegexOptions.Compiled);
 
-        string email = input.Trim();
+        // Private constructor for EF Core
+        private Email() { Value = null!; }
 
-        if (email.Length > 200)
-            throw new ArgumentException("Value is too long", nameof(Value));
+        // Public constructor with email validation
+        public Email(string? input, bool emailConfirmed)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                throw new ArgumentNullException(nameof(input), "Email value is required");
 
-        if (!EmailRegex.IsMatch(email))
-            throw new ArgumentException("Invalid email format", nameof(Value));
+            string email = input.Trim();
 
-        Value = email;
-        EmailConfirmed = emailConfirmed;
+            if (email.Length > 200)
+                throw new ArgumentException("Email value is too long", nameof(Value));
+
+            if (!EmailValidationRegex.IsMatch(email))
+                throw new ArgumentException("Invalid email format", nameof(Value));
+
+            Value = email;
+            EmailConfirmed = emailConfirmed;
+        }
+
+        // Email value
+        public string Value { get; }
+
+        // Email confirmation status
+        public bool EmailConfirmed { get; set; } = false;
     }
-
-    public string Value { get; }
-    public bool EmailConfirmed { get; set; } = false;
 }
