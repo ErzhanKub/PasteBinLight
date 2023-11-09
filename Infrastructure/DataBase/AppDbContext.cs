@@ -10,7 +10,7 @@ public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions opts) : base(opts) { }
     public DbSet<User> Users => Set<User>();
-    public DbSet<Poste> Postes => Set<Poste>();
+    public DbSet<Record> Postes => Set<Record>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -39,13 +39,13 @@ public class AppDbContext : DbContext
     private void ConfigureIndexes(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>().HasIndex(u => u.Username).IsUnique();
-        modelBuilder.Entity<Poste>()
+        modelBuilder.Entity<Record>()
              .HasOne(p => p.User)
-             .WithMany(u => u.Postes)
+             .WithMany(u => u.Records)
              .HasForeignKey(p => p.UserId)
              .OnDelete(DeleteBehavior.Cascade);
         modelBuilder.Entity<User>()
-            .Navigation(u => u.Postes).AutoInclude();
+            .Navigation(u => u.Records).AutoInclude();
     }
 
     private void SeedData(ModelBuilder modelBuilder)
@@ -56,7 +56,7 @@ public class AppDbContext : DbContext
             Role.Admin,
             "ConfirmToken");
 
-        var poste = new Poste
+        var poste = new Record
         {
             Id = Guid.NewGuid(),
             Title = "My day",
@@ -70,7 +70,7 @@ public class AppDbContext : DbContext
         };
 
         modelBuilder.Entity<User>().HasData(user);
-        modelBuilder.Entity<Poste>().HasData(poste);
+        modelBuilder.Entity<Record>().HasData(poste);
     }
 
 

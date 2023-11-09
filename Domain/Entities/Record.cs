@@ -1,6 +1,6 @@
 ﻿namespace Domain.Entities;
 
-public class Poste
+public class Record
 {
     public Guid Id { get; set; }
     public required Uri Url { get; set; }

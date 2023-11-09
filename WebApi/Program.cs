@@ -1,6 +1,5 @@
 ﻿using Application;
 using Infrastructure;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -62,12 +61,12 @@ builder.Services.AddAuthentication().AddJwtBearer(opts =>
     };
 });
 
-builder.Services.AddAuthorization(opts =>
-{
-    opts.FallbackPolicy = new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
-});
+//builder.Services.AddAuthorization(opts =>
+//{
+//    opts.FallbackPolicy = new AuthorizationPolicyBuilder()
+//        .RequireAuthenticatedUser()
+//        .Build();
+//});
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastruct(builder.Configuration);

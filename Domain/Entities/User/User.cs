@@ -14,7 +14,7 @@ public sealed class User : BaseEntity
         Password = password;
         Email = email;
         Role = role;
-        Postes = new ReadOnlyCollection<Poste>(new List<Poste>());
+        Records = new ReadOnlyCollection<Record>(new List<Record>());
         ConfirmationToken = confirmationToken;
     }
 
@@ -23,7 +23,7 @@ public sealed class User : BaseEntity
     public Email Email { get; private set; }
     public Role Role { get; private set; }
     public string ConfirmationToken { get; private set; }
-    public ICollection<Poste> Postes { get; private set; } = new List<Poste>();
+    public ICollection<Record> Records { get; private set; } = new List<Record>();
 
     public static User Create(Username name, Password password,
         Email email, Role role, string confirmationToken)
@@ -33,18 +33,18 @@ public sealed class User : BaseEntity
         return user;
     }
 
-    public void AddPoste(Poste poste)
+    public void AddRecord(Record record)
     {
-        var postesList = Postes.ToList();
-        postesList.Add(poste);
-        Postes = new ReadOnlyCollection<Poste>(postesList);
+        var recordsList = Records.ToList();
+        recordsList.Add(record);
+        Records = new ReadOnlyCollection<Record>(recordsList);
     }
 
-    public void RemovePoste(Poste poste)
+    public void RemoveRecord(Record record)
     {
-        var postesList = Postes.ToList();
-        postesList.Remove(poste);
-        Postes = new ReadOnlyCollection<Poste>(postesList);
+        var recordsList = Records.ToList();
+        recordsList.Remove(record);
+        Records = new ReadOnlyCollection<Record>(recordsList);
     }
 
     public void UpdatePassword(string newPassword)

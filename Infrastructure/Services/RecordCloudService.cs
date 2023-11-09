@@ -1,31 +1,15 @@
 ﻿using Amazon.S3.Model;
 using Amazon.S3;
-using Domain.Entities;
-using Domain.Repositories;
 using Amazon;
-using Infrastructure.DataBase;
-using Microsoft.EntityFrameworkCore;
+using Domain.IServices;
 
-namespace Infrastructure.Repositories;
+namespace Infrastructure.Services;
 
-public class PosteRepository : IPosteRepository
+public class RecordCloudService : IRecordCloudService
 {
     public const string bucketName = "basketforfinalproject";
     public const string accessKey = "AKIARQAYJTSFMJZ3APWV";
     public const string secretKey = "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";
-
-    private readonly AppDbContext _dbcontext;
-
-    public PosteRepository(AppDbContext dbcontext)
-    {
-        _dbcontext = dbcontext;
-    }
-
-    public async Task<Guid> CreateAsync(Poste entity)
-    {
-        await _dbcontext.Postes.AddAsync(entity);
-        return entity.Id;
-    }
 
     public async Task DeleteTextFromCloudAsync(string keyName)
     {
@@ -38,31 +22,16 @@ public class PosteRepository : IPosteRepository
         await client.DeleteObjectAsync(deletedRequest);
     }
 
-    public Task<Guid[]> DeleteRangeAsync(params Guid[] ids)
+    public async Task EditTextFromCloudeAsync(string objectKey, string text)
     {
-        var posteToDelete = _dbcontext.Postes.Where(p => ids.Contains(p.Id));
-        _dbcontext.Postes.RemoveRange(posteToDelete);
-        return Task.FromResult(ids);
-    }
-
-    public async Task<Poste?> GetByIdAsync(Guid id)
-    {
-        var poste = await _dbcontext.Postes.FirstOrDefaultAsync(p => p.Id == id);
-        return poste;
-    }
-
-    public Guid GetDecodedGuid(string decodedBytes)
-    {
-        byte[] decoded = Convert.FromBase64String(decodedBytes);
-        var guid = new Guid(decoded);
-        return guid;
-    }
-
-    public string GetEncodedGuid(Guid guid)
-    {
-        byte[] guidBytes = guid.ToByteArray();
-        string base64Guid = Convert.ToBase64String(guidBytes);
-        return base64Guid;
+        using var client = new AmazonS3Client(accessKey, secretKey, RegionEndpoint.EUNorth1);
+        var request = new PutObjectRequest
+        {
+            BucketName = bucketName,
+            Key = objectKey,
+            ContentBody = text
+        };
+        await client.PutObjectAsync(request);
     }
 
     public async Task<string> GetTextFromCloudAsync(Uri url)
@@ -82,11 +51,6 @@ public class PosteRepository : IPosteRepository
         string text = await reader.ReadToEndAsync();
 
         return text;
-    }
-
-    public void Update(Poste entity)
-    {
-        _dbcontext.Postes.Update(entity);
     }
 
     public async Task<string> UploadTextToCloudAsync(string objectKey, string text)
@@ -110,22 +74,5 @@ public class PosteRepository : IPosteRepository
 
         var url = $"https://{bucketName}.s3.{RegionEndpoint.EUNorth1.SystemName}.amazonaws.com/{objectKey}";
         return url;
-    }
-
-    public async Task EditTextFromCloudeAsync(string objectKey, string text)
-    {
-        using var client = new AmazonS3Client(accessKey, secretKey, RegionEndpoint.EUNorth1);
-        var request = new PutObjectRequest
-        {
-            BucketName = bucketName,
-            Key = objectKey,
-            ContentBody = text
-        };
-        await client.PutObjectAsync(request);
-    }
-
-    public async Task<IReadOnlyList<Poste>> GetAllAsync()
-    {
-        return await _dbcontext.Postes.AsNoTracking().ToListAsync();
     }
 }

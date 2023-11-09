@@ -1,7 +1,9 @@
 ﻿using Application.Shared;
+using Domain.IServices;
 using Domain.Repositories;
 using Infrastructure.DataBase;
 using Infrastructure.Repositories;
+using Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +22,9 @@ public static class InfrastructureServicesRegistration
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<IPosteRepository, PosteRepository>();
+        services.AddScoped<IRecordRepository, RecordRepository>();
+        services.AddScoped<IRecordCloudService, RecordCloudService>();
+        services.AddScoped<IQRCodeGeneratorService, QRCodeGeneratorService>();
 
         return services;
     }
