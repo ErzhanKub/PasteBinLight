@@ -4,6 +4,7 @@ using Application.Features.Records.Get;
 using Application.Features.Records.Update;
 using Domain.IServices;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebApi.Services;

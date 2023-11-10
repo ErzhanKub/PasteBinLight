@@ -5,6 +5,7 @@ using Application.Features.Users.Update;
 using Domain.Entities;
 using Domain.IServices;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Web;
@@ -15,6 +16,7 @@ namespace WebApi.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 [Produces("application/json")]
+[Authorize(Roles = "Admin")]
 public class UserController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -58,6 +60,7 @@ public class UserController : ControllerBase
         return NotFound(response.Reasons);
     }
 
+    [Authorize(Roles = "User, Admin")]
     [HttpPut("users/me")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -181,6 +184,7 @@ public class UserController : ControllerBase
         return NotFound(response.Reasons);
     }
 
+    [Authorize(Roles = "User, Admin")]
     [HttpDelete("users/me")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -204,6 +208,7 @@ public class UserController : ControllerBase
         return NotFound(response.Reasons);
     }
 
+    [Authorize(Roles = "User, Admin")]
     [HttpDelete("me")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -233,6 +238,7 @@ public class UserController : ControllerBase
         return NotFound(response.Reasons);
     }
 
+    [Authorize(Roles = "User, Admin")]
     [HttpPatch("confirm/{confirmToken}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
