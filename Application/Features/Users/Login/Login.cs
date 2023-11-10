@@ -1,101 +1,109 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿// Importing the required libraries
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace Application.Features.Users.Login;
-public record LoginRequest : IRequest<Result<LoginResponseDto>>
+// Namespace for the user login feature
+namespace Application.Features.Users.Login
 {
-    public required string Username { get; init; }
-    public required string Password { get; init; }
-}
-public class LoginRequestValidator : AbstractValidator<LoginRequest>
-{
-    public LoginRequestValidator()
+    // Class to handle the request for logging in a user
+    public record UserLoginRequest : IRequest<Result<LoginResponseDto>>
     {
-        RuleFor(l => l.Username)
-            .NotEmpty()
-            .Length(1, 100)
-            .Matches("^[a-zA-Z0-9]*$")
-            .WithMessage("Username can only contain alphanumeric characters");
-
-        RuleFor(l => l.Password)
-            .NotEmpty()
-            .MinimumLength(8)
-            .WithMessage("Password must be at least 8 characters long")
-            .Length(1, 16);
-    }
-}
-
-public class LoginHandler : IRequestHandler<LoginRequest, Result<LoginResponseDto>>
-{
-    private readonly IConfiguration _configuration;
-    private readonly IUserRepository _userRepository;
-    private readonly ILogger<LoginHandler> _logger;
-
-    private const string InputIncorrectMessega = "Username or password is incorrect";
-    private const string ReceivedTokenMessega = "Received a token for user by Id: {Id}; Token: {tokenString}";
-    private const string ErrorMessega = "An error was received while receiving a token";
-
-    public LoginHandler(IConfiguration configuration, IUserRepository userRepository, ILogger<LoginHandler> logger)
-    {
-        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        public required string Username { get; init; }
+        public required string Password { get; init; }
     }
 
-    public async Task<Result<LoginResponseDto>> Handle(LoginRequest request, CancellationToken cancellationToken)
+    // Validator class for the UserLoginRequest
+    public class UserLoginRequestValidator : AbstractValidator<UserLoginRequest>
     {
-        try
+        public UserLoginRequestValidator()
         {
-            var user = await _userRepository.CheckUserCredentialsAsync(request.Username, request.Password);
-            if (user is null)
+            RuleFor(l => l.Username)
+                .NotEmpty()
+                .Length(1, 100)
+                .Matches("^[a-zA-Z0-9]*$")
+                .WithMessage("Username can only contain alphanumeric characters");
+
+            RuleFor(l => l.Password)
+                .NotEmpty()
+                .MinimumLength(8)
+                .WithMessage("Password must be at least 8 characters long")
+                .Length(1, 16);
+        }
+    }
+
+    // Handler class for the UserLoginRequest
+    public class UserLoginHandler : IRequestHandler<UserLoginRequest, Result<LoginResponseDto>>
+    {
+        private readonly IConfiguration _config;
+        private readonly IUserRepository _userRepo;
+        private readonly ILogger<UserLoginHandler> _logger;
+
+        private const string IncorrectInputMessage = "Username or password is incorrect";
+        private const string TokenReceivedMessage = "Received a token for user by Id: {Id}; Token: {tokenString}";
+        private const string ErrorMessage = "An error was received while receiving a token";
+
+        public UserLoginHandler(IConfiguration config, IUserRepository userRepo, ILogger<UserLoginHandler> logger)
+        {
+            _config = config ?? throw new ArgumentNullException(nameof(config));
+            _userRepo = userRepo ?? throw new ArgumentNullException(nameof(userRepo));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
+        public async Task<Result<LoginResponseDto>> Handle(UserLoginRequest request, CancellationToken cancellationToken)
+        {
+            try
             {
-                _logger.LogWarning(InputIncorrectMessega);
-                return Result.Fail(InputIncorrectMessega);
+                var user = await _userRepo.ValidateUserCredentialsAsync(request.Username, request.Password);
+                if (user is null)
+                {
+                    _logger.LogWarning(IncorrectInputMessage);
+                    return Result.Fail(IncorrectInputMessage);
+                }
+
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                    new Claim(ClaimTypes.Name, user.Username.Value),
+                    new Claim(ClaimTypes.Email, user.Email.Value),
+                    new Claim(ClaimTypes.Role, user.Role.ToString())
+                };
+
+                var tokenString = GenerateTokenString(claims, DateTime.UtcNow.AddHours(1));
+
+                _logger.LogInformation(TokenReceivedMessage, user.Id, tokenString);
+
+                var response = new LoginResponseDto
+                {
+                    UserId = user.Id,
+                    Token = tokenString,
+                };
+
+                return Result.Ok(response);
             }
-
-            var claims = new List<Claim>
+            catch (Exception ex)
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username.Value),
-                new Claim(ClaimTypes.Email, user.Email.Value),
-                new Claim(ClaimTypes.Role, user.Role.ToString())
-            };
-
-            var tokenString = GetTokenString(claims, DateTime.UtcNow.AddHours(1));
-
-            _logger.LogInformation(ReceivedTokenMessega, user.Id, tokenString);
-
-            var response = new LoginResponseDto
-            {
-                UserId = user.Id,
-                Token = tokenString,
-            };
-
-            return Result.Ok(response);
+                _logger.LogError(ex, ErrorMessage);
+                throw;
+            }
         }
-        catch (Exception ex)
+
+        private string GenerateTokenString(List<Claim> claims, DateTime exp)
         {
-            _logger.LogError(ex, ErrorMessega);
-            throw;
+            var key = _config["Jwt"] ?? throw new Exception();
+            var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key));
+
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: exp,
+                signingCredentials: new SigningCredentials(
+                    securityKey, SecurityAlgorithms.HmacSha256));
+
+            var handler = new JwtSecurityTokenHandler();
+
+            return handler.WriteToken(token);
         }
-    }
-
-    private string GetTokenString(List<Claim> claims, DateTime exp)
-    {
-        var key = _configuration["Jwt"] ?? throw new Exception();
-        var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key));
-
-        var token = new JwtSecurityToken(
-            claims: claims,
-            expires: exp,
-            signingCredentials: new SigningCredentials(
-                securityKey, SecurityAlgorithms.HmacSha256));
-
-        var handler = new JwtSecurityTokenHandler();
-
-        return handler.WriteToken(token);
     }
 }

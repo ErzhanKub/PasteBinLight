@@ -1,5 +1,6 @@
 ﻿using Application;
 using Infrastructure;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -8,14 +9,19 @@ using WebApi.Middlewere;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure Serilog for logging
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration).CreateLogger();
 builder.Host.UseSerilog();
 
-
+// Add controllers and API explorer
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+// Configure CORS to allow any method, origin, and header
+builder.Services.AddCors(opts => opts.AddDefaultPolicy(opts => opts.AllowAnyMethod().AllowAnyOrigin().AllowAnyHeader()));
+
+// Configure Swagger for API documentation
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "FP", Version = "v2077" });
@@ -24,7 +30,6 @@ builder.Services.AddSwaggerGen(c =>
         Description = "Authorization using jwt token. Example: \"Bearer {token}\"",
         Name = "Authorization",
         In = ParameterLocation.Header,
-
         Type = SecuritySchemeType.ApiKey
     });
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -43,6 +48,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+// Configure authentication with JWT
 builder.Services.AddAuthentication().AddJwtBearer(opts =>
 {
     opts.SaveToken = true;
@@ -56,38 +62,41 @@ builder.Services.AddAuthentication().AddJwtBearer(opts =>
         IssuerSigningKey =
            new SymmetricSecurityKey(
                 Encoding.ASCII.GetBytes(
-                    builder.Configuration["Jwt"] ??
-                        throw new Exception("Jwt not found."))),
+                    builder.Configuration["Jwt"] ?? throw new Exception("Jwt configuration not found. Please ensure it is set in the configuration file."))),
     };
 });
 
-//builder.Services.AddAuthorization(opts =>
-//{
-//    opts.FallbackPolicy = new AuthorizationPolicyBuilder()
-//        .RequireAuthenticatedUser()
-//        .Build();
-//});
+// Configure authorization to require authenticated user
+builder.Services.AddAuthorization(opts =>
+{
+    opts.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
-builder.Services.AddApplication();
-builder.Services.AddInfrastruct(builder.Configuration);
+// Add application and infrastructure services
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
+
+// Add middleware for exception handling
 builder.Services.AddTransient<ExceptionHandlingMiddlwere>();
 
 var app = builder.Build();
 
+// Use Swagger in development environment
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+// Configure middleware, CORS, authentication, and authorization
 app.UseMiddleware<ExceptionHandlingMiddlwere>();
-
 app.UseHttpsRedirection();
-
+app.UseCors();
 app.UseAuthentication();
-
 app.UseAuthorization();
 
+// Map controllers and run application
 app.MapControllers();
-
 app.Run();

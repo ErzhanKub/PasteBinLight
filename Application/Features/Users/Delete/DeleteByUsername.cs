@@ -1,61 +1,66 @@
-﻿namespace Application.Features.Users.Delete;
-
-public record DeleteByUsernameCommand : IRequest<Result<string>>
+﻿// Namespace for the user deletion feature
+namespace Application.Features.Users.Delete
 {
-    public string? Username { get; init; }
-}
-
-public class DeleteByUsernameValidator : AbstractValidator<DeleteByUsernameCommand>
-{
-    public DeleteByUsernameValidator() 
+    // Class to handle the command for deleting a user by username
+    public record DeleteByUsernameCommand : IRequest<Result<string>>
     {
-        RuleFor(u => u.Username)
-            .NotNull()
-            .WithMessage("Such user does not exist");
-        RuleFor(u => u.Username)
-            .NotEmpty()
-            .WithMessage("Username must not be empty");
+        public string? TargetUsername { get; init; }
     }
-}
 
-public class DeleteByUsernameCommadHandler : IRequestHandler<DeleteByUsernameCommand, Result<string>>
-{
-    private readonly IUserRepository _userRepository;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger<DeleteUsersByIdsHandler> _logger;
-
-    private const string UserNotFoundMessage = "User(s) not found";
-    private const string UserDeletedMessage = "Deleted users: {Username}";
-    private const string ErrorMessage = "Error occurred while deleting users";
-
-    public DeleteByUsernameCommadHandler(IUserRepository userRepository, IUnitOfWork unitOfWork, ILogger<DeleteUsersByIdsHandler> logger)
+    // Validator class for the DeleteByUsernameCommand
+    public class DeleteByUsernameValidator : AbstractValidator<DeleteByUsernameCommand>
     {
-        _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-        _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
-    
-    public async Task<Result<string>> Handle(DeleteByUsernameCommand request, CancellationToken cancellationToken)
-    {
-        try
+        public DeleteByUsernameValidator()
         {
-            var result = await _userRepository.DeleteUserByUsernameAsync(request.Username!);
-
-            if (result is null)
-            {
-                _logger.LogWarning(UserNotFoundMessage);
-                return Result.Fail<string>(UserNotFoundMessage);
-            }
-
-            await _unitOfWork.SaveCommitAsync();
-
-            _logger.LogInformation(UserDeletedMessage, string.Join(", ", result));
-            return Result.Ok(result);
+            RuleFor(u => u.TargetUsername)
+                .NotNull()
+                .WithMessage("Such user does not exist");
+            RuleFor(u => u.TargetUsername)
+                .NotEmpty()
+                .WithMessage("Username must not be empty");
         }
-        catch (Exception ex)
+    }
+
+    // Handler class for the DeleteByUsernameCommand
+    public class DeleteByUsernameCommandHandler : IRequestHandler<DeleteByUsernameCommand, Result<string>>
+    {
+        private readonly IUserRepository _userRepo;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<DeleteByUsernameCommandHandler> _logger;
+
+        private const string UserNotFoundMessage = "User(s) not found";
+        private const string UserDeletedMessage = "Deleted user: {Username}";
+        private const string ErrorMessage = "Error occurred while deleting user";
+
+        public DeleteByUsernameCommandHandler(IUserRepository userRepo, IUnitOfWork unitOfWork, ILogger<DeleteByUsernameCommandHandler> logger)
         {
-            _logger.LogError(ex, ErrorMessage);
-            throw;
+            _userRepo = userRepo ?? throw new ArgumentNullException(nameof(userRepo));
+            _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
+
+        public async Task<Result<string>> Handle(DeleteByUsernameCommand request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await _userRepo.RemoveUserByUsernameAsync(request.TargetUsername!);
+
+                if (result is null)
+                {
+                    _logger.LogWarning(UserNotFoundMessage);
+                    return Result.Fail<string>(UserNotFoundMessage);
+                }
+
+                await _unitOfWork.SaveAndCommitAsync(cancellationToken);
+
+                _logger.LogInformation(UserDeletedMessage, result);
+                return Result.Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, ErrorMessage);
+                throw;
+            }
         }
     }
 }

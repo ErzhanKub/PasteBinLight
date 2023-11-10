@@ -2,15 +2,21 @@
 
 namespace Infrastructure.DataBase;
 
+// UnitOfWork class that implements the IUnitOfWork interface
 public class UnitOfWork : IUnitOfWork
 {
+    // Database context
     private readonly AppDbContext _dbContext;
+
+    // Constructor
     public UnitOfWork(AppDbContext dbContext)
     {
         _dbContext = dbContext;
     }
-    public Task SaveCommitAsync()
+
+    // Save changes and commit the transaction asynchronously
+    public async Task SaveAndCommitAsync(CancellationToken cancellationToken)
     {
-        return _dbContext.SaveChangesAsync();
+        await _dbContext.SaveChangesAsync();
     }
 }

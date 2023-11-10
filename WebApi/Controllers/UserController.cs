@@ -3,6 +3,7 @@ using Application.Features.Users.Delete;
 using Application.Features.Users.Get;
 using Application.Features.Users.Update;
 using Domain.Entities;
+using Domain.IServices;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -17,15 +18,17 @@ namespace WebApi.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly ITelegramService _telegramService;
     private readonly ILogger<UserController> _logger;
 
-    public UserController(IMediator mediator, ILogger<UserController> logger)
+    public UserController(IMediator mediator, ILogger<UserController> logger, ITelegramService telegramService)
     {
         _mediator = mediator;
         _logger = logger;
+        _telegramService = telegramService;
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("users/{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Обновляет пользователя по Id.")]
@@ -35,27 +38,27 @@ public class UserController : ControllerBase
     {
         var request = new UpdateUserByIdCommand
         {
-            Id = id,
-            Username = username,
-            Password = password,
-            Email = email,
-            UserRole = userRole,
+            UserId = id,
+            NewUsername = username,
+            NewPassword = password,
+            NewEmail = email,
+            NewUserRole = userRole,
         };
 
         _logger.LogInformation("Updating user by Id: {Id}", id);
-        var result = await _mediator.Send(request);
+        var response = await _mediator.Send(request);
 
-        if (result.IsSuccess)
+        if (response.IsSuccess)
         {
             _logger.LogInformation("User with Id: {Id} successfully updated", id);
-            return Ok(result.Value);
+            return Ok(response.Value);
         }
 
-        _logger.LogError("Failed to update user with Id: {Id}. Reasons: {Reasons}", id, result.Reasons);
-        return NotFound(result.Reasons);
+        _logger.LogError("Failed to update user with Id: {Id}. Reasons: {Reasons}", id, response.Reasons);
+        return NotFound(response.Reasons);
     }
 
-    [HttpPut("me")]
+    [HttpPut("users/me")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Обновляет текущего пользователя.")]
@@ -67,92 +70,97 @@ public class UserController : ControllerBase
         var userId = UserServices.GetCurrentUserId(currentUser);
         var request = new UpdateUserByIdCommand
         {
-            Id = userId,
-            Username = username,
-            Password = password,
-            Email = email,
-            UserRole = 1,
+            UserId = userId,
+            NewUsername = username,
+            NewPassword = password,
+            NewEmail = email,
+            NewUserRole = 1,
         };
 
         _logger.LogInformation("Updating current user Id: {Id}", userId);
-        var result = await _mediator.Send(request);
+        var response = await _mediator.Send(request);
 
-        if (result.IsSuccess)
+        if (response.IsSuccess)
         {
             _logger.LogInformation("Current user Id: {Id} successfully updated", userId);
-            return Ok(result.Value);
+            return Ok(response.Value);
         }
 
-        _logger.LogError("Failed to update current user with ID: {Id}. Reasons: {Reasons}", userId, result.Reasons);
-        return NotFound(result.Reasons);
+        _logger.LogError("Failed to update current user with ID: {Id}. Reasons: {Reasons}", userId, response.Reasons);
+        return NotFound(response.Reasons);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("users/{userId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Получает пользователя по Id.")]
     [SwaggerResponse(StatusCodes.Status200OK, "User successfully retrieved")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ValidationProblemDetails))]
-    public async Task<IActionResult> GetUserById(GetOneUserRequest request)
+    public async Task<IActionResult> GetUserById(Guid userId)
     {
-        _logger.LogInformation("Retrieving user by ID: {Id}", request.Id);
-        var result = await _mediator.Send(request);
-
-        if (result.IsSuccess)
+        var request = new FetchUserByIdRequest
         {
-            _logger.LogInformation("User with Id: {Id} successfully retrieved", result.Value.Id);
-            return Ok(result.Value);
+            UserId = userId,
+        };
+
+        _logger.LogInformation("Retrieving user by ID: {Id}", request.UserId);
+        var response = await _mediator.Send(request);
+
+        if (response.IsSuccess)
+        {
+            _logger.LogInformation("User with Id: {Id} successfully retrieved", response.Value.Id);
+            return Ok(response.Value);
         }
 
-        _logger.LogError("Failed to retrieve user with Id: {Id}. Reasons: {Reasons}", result.Value.Id, result.Reasons);
-        return NotFound(result.Reasons);
+        _logger.LogError("Failed to retrieve user with Id: {Id}. Reasons: {Reasons}", response.Value.Id, response.Reasons);
+        return NotFound(response.Reasons);
     }
 
-    [HttpGet("{username}")]
+    [HttpGet("users/username/{username}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Получает пользователя по username.")]
     [SwaggerResponse(StatusCodes.Status200OK, "User successfully retrieved")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ValidationProblemDetails))]
-    public async Task<IActionResult> GetUserByUsername(GetUserByUsernameRequest request)
+    public async Task<IActionResult> GetUserByUsername(string username)
     {
-        _logger.LogInformation("Retrieving user by username: {username}", request.Username);
-        var result = await _mediator.Send(request);
+        var request = new FetchUserByUsernameRequest { TargetUsername = username };
 
-        if (result.IsSuccess)
+        _logger.LogInformation("Retrieving user by username: {username}", request.TargetUsername);
+        var response = await _mediator.Send(request);
+
+        if (response.IsSuccess)
         {
-            _logger.LogInformation("User with username: {username} successfully retrieved", result.Value.Username);
-            return Ok(result.Value);
+            _logger.LogInformation("User with username: {username} successfully retrieved", response.Value.Username);
+            return Ok(response.Value);
         }
 
-        _logger.LogError("Failed to retrieve user with username: {username}. Reasons: {Reasons}", result.Value.Username, result.Reasons);
-        return NotFound(result.Reasons);
+        _logger.LogError("Failed to retrieve user with username: {username}. Reasons: {Reasons}", response.Value.Username, response.Reasons);
+        return NotFound(response.Reasons);
     }
 
-    [HttpGet]
+    [HttpGet("users")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Получает всех пользователей.")]
     [SwaggerResponse(StatusCodes.Status200OK, "All users successfully retrieved")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Users not found", typeof(ValidationProblemDetails))]
-    public async Task<IActionResult> GetAllUsers()
+    public async Task<IActionResult> GetAllUsers([FromQuery]GetAllUsersRequest request)
     {
-        var request = new GetAllRequest();
-
         _logger.LogInformation("Retrieving all users");
-        var result = await _mediator.Send(request);
+        var reponse = await _mediator.Send(request);
 
-        if (result.IsSuccess)
+        if (reponse.IsSuccess)
         {
             _logger.LogInformation("All users successfully retrieved");
-            return Ok(result.Value);
+            return Ok(reponse.Value);
         }
 
-        _logger.LogError("Failed to retrieve all users. Reasons: {Reasons}", result.Reasons);
-        return NotFound(result.Reasons);
+        _logger.LogError("Failed to retrieve all users. Reasons: {Reasons}", reponse.Reasons);
+        return NotFound(reponse.Reasons);
     }
 
-    [HttpDelete]
+    [HttpDelete("users")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Удаляет пользователя по Id.")]
@@ -160,20 +168,20 @@ public class UserController : ControllerBase
     [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ValidationProblemDetails))]
     public async Task<IActionResult> DeleteById(DeleteUsersByIdsCommand command)
     {
-        _logger.LogInformation("Deleting user by ID: {Id}", command.Id);
-        var result = await _mediator.Send(command);
+        _logger.LogInformation("Deleting user by ID: {Id}", command.UserIds);
+        var response = await _mediator.Send(command);
 
-        if (result.IsSuccess)
+        if (response.IsSuccess)
         {
-            _logger.LogInformation("User with ID: {Id} successfully deleted", command.Id);
-            return Ok(result.Value);
+            _logger.LogInformation("User with ID: {Id} successfully deleted", command.UserIds);
+            return Ok(response.Value);
         }
 
-        _logger.LogError("Failed to delete user with ID: {Id}. Reasons: {Reasons}", command.Id, result.Reasons);
-        return NotFound(result.Reasons);
+        _logger.LogError("Failed to delete user with ID: {Id}. Reasons: {Reasons}", command.UserIds, response.Reasons);
+        return NotFound(response.Reasons);
     }
 
-    [HttpDelete("{username}")]
+    [HttpDelete("users/me")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Удаляет пользователя по Username.")]
@@ -181,19 +189,19 @@ public class UserController : ControllerBase
     [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ValidationProblemDetails))]
     public async Task<IActionResult> DeleteByUsername(string username)
     {
-        var command = new DeleteByUsernameCommand { Username = username };
+        var command = new DeleteByUsernameCommand { TargetUsername = username };
 
-        _logger.LogInformation("Deleting user by Username: {Username}", command.Username);
-        var result = await _mediator.Send(command);
+        _logger.LogInformation("Deleting user by Username: {Username}", command.TargetUsername);
+        var response = await _mediator.Send(command);
 
-        if (result.IsSuccess)
+        if (response.IsSuccess)
         {
-            _logger.LogInformation("User with Username: {Username} successfully deleted", command.Username);
-            return Ok(result.Value);
+            _logger.LogInformation("User with Username: {Username} successfully deleted", command.TargetUsername);
+            return Ok(response.Value);
         }
 
-        _logger.LogError("Failed to delete user with Username: {Username}. Reasons: {Reasons}", command.Username, result.Reasons);
-        return NotFound(result.Reasons);
+        _logger.LogError("Failed to delete user with Username: {Username}. Reasons: {Reasons}", command.TargetUsername, response.Reasons);
+        return NotFound(response.Reasons);
     }
 
     [HttpDelete("me")]
@@ -209,20 +217,20 @@ public class UserController : ControllerBase
 
         var command = new DeleteUsersByIdsCommand()
         {
-            Id = new Guid[] { currentUserId },
+            UserIds = new Guid[] { currentUserId },
         };
 
         _logger.LogInformation("Deleting current user by ID: {Id}", currentUserId);
-        var result = await _mediator.Send(command);
+        var response = await _mediator.Send(command);
 
-        if (result.IsSuccess)
+        if (response.IsSuccess)
         {
             _logger.LogInformation("Current user with ID: {Id} successfully deleted", currentUserId);
-            return Ok(result.Value);
+            return Ok(response.Value);
         }
 
-        _logger.LogError("Failed to delete current user with ID: {Id}. Reasons: {Reasons}", currentUserId, result.Reasons);
-        return NotFound(result.Reasons);
+        _logger.LogError("Failed to delete current user with ID: {Id}. Reasons: {Reasons}", currentUserId, response.Reasons);
+        return NotFound(response.Reasons);
     }
 
     [HttpPatch("confirm/{confirmToken}")]
@@ -238,21 +246,21 @@ public class UserController : ControllerBase
 
         string decodedToken = HttpUtility.UrlDecode(confirmToken);
 
-        var command = new ConfirmEmailCommand
+        var command = new ConfirmUserEmailCommand
         {
             UserId = userId,
-            ConfirmToken = decodedToken
+            ConfirmationToken = decodedToken
         };
 
         _logger.LogInformation("Confirming email for user by ID: {Id}", userId);
-        var result = await _mediator.Send(command);
-        if (result.IsSuccess)
+        var response = await _mediator.Send(command);
+        if (response.IsSuccess)
         {
             _logger.LogInformation("Email for user with ID: {Id} successfully confirmed", userId);
             return Ok("Mail confirmed");
         }
 
-        _logger.LogError("Failed to confirm email for user with ID: {Id}. Reasons: {Reasons}", userId, result.Reasons);
-        return NotFound(result.Reasons);
+        _logger.LogError("Failed to confirm email for user with ID: {Id}. Reasons: {Reasons}", userId, response.Reasons);
+        return NotFound(response.Reasons);
     }
 }

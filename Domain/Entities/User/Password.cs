@@ -1,17 +1,24 @@
-﻿namespace Domain.Entities;
-
-public sealed record Password
+﻿namespace Domain.Entities
 {
-    private Password() { Value = null!; }
-    public Password(string? password)
+    // Immutable record type for Password
+    public sealed record Password
     {
-        if (string.IsNullOrWhiteSpace(password))
-            throw new ArgumentNullException(nameof(password), "Value is required");
+        // Private constructor for EF Core
+        private Password() { Value = null!; }
 
-        if (password.Length > 200)
-            throw new ArgumentException("Value is too long", nameof(password));
+        // Public constructor with password validation
+        public Password(string? password)
+        {
+            if (string.IsNullOrWhiteSpace(password))
+                throw new ArgumentNullException(nameof(password), "Password value is required");
 
-        Value = password;
+            if (password.Length > 200)
+                throw new ArgumentException("Password value is too long", nameof(password));
+
+            Value = password;
+        }
+
+        // Password value
+        public string Value { get; }
     }
-    public string Value { get; }
 }

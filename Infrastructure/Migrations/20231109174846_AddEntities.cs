@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Test1 : Migration
+    public partial class AddEntities : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -28,7 +28,7 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Postes",
+                name: "Records",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -43,9 +43,9 @@ namespace Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Postes", x => x.Id);
+                    table.PrimaryKey("PK_Records", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Postes_Users_UserId",
+                        name: "FK_Records_Users_UserId",
                         column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "Id",
@@ -55,16 +55,16 @@ namespace Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "ConfirmationToken", "Email", "Password", "Role", "Username" },
-                values: new object[] { new Guid("323c8e8b-8e44-47bf-89ce-e8af73c8007d"), "ConfirmToken", "string@mail.com", "b4923143305b8c19f5c5031c406be92b99ce221e00c795598356d9fc0fc117bc", 2, "SuperAdmin2077CP" });
+                values: new object[] { new Guid("ad420878-46b9-4626-b647-c468a7dadaa6"), "ConfirmToken", "string@mail.com", "b4923143305b8c19f5c5031c406be92b99ce221e00c795598356d9fc0fc117bc", 2, "SuperAdmin2077CP" });
 
             migrationBuilder.InsertData(
-                table: "Postes",
+                table: "Records",
                 columns: new[] { "Id", "DateCreated", "DeadLine", "DisLikes", "IsPrivate", "Likes", "Title", "Url", "UserId" },
-                values: new object[] { new Guid("90c5b3b2-8a8d-44cf-ab9b-306dd828c465"), new DateTime(2023, 11, 7, 20, 44, 38, 91, DateTimeKind.Local).AddTicks(7317), new DateTime(2023, 12, 7, 20, 44, 38, 91, DateTimeKind.Local).AddTicks(7327), 13L, false, 183L, "My day", "https://www.youtube.com/", new Guid("323c8e8b-8e44-47bf-89ce-e8af73c8007d") });
+                values: new object[] { new Guid("22f1f883-46c5-4572-81e8-dbf19c74c12f"), new DateTime(2023, 11, 9, 23, 48, 46, 223, DateTimeKind.Local).AddTicks(168), new DateTime(2023, 12, 9, 23, 48, 46, 223, DateTimeKind.Local).AddTicks(184), 13L, false, 183L, "My day", "https://www.youtube.com/", new Guid("ad420878-46b9-4626-b647-c468a7dadaa6") });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Postes_UserId",
-                table: "Postes",
+                name: "IX_Records_UserId",
+                table: "Records",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
@@ -78,7 +78,7 @@ namespace Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Postes");
+                name: "Records");
 
             migrationBuilder.DropTable(
                 name: "Users");

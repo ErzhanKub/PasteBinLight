@@ -1,7 +1,14 @@
-﻿namespace WebApi.Dtos;
+﻿using System.ComponentModel.DataAnnotations;
 
-public class ErrorDto
+namespace WebApi.Dtos
 {
-    public int StatusCode { get; set; }
-    public string? Message { get; set; }
+    public class ErrorDto
+    {
+        // HTTP status code
+        public int StatusCode { get; set; }
+
+        // Error message
+        [Required]
+        public string? Message { get; set; }
+    }
 }
