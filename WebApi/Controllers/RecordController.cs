@@ -55,7 +55,7 @@ public class RecordController : ControllerBase
 
         _logger.LogInformation("Created Record: {Value}", response.Value);
 
-        var recordUrl = $"https://localhost:7056/api/Record/{response.Value}";
+        var recordUrl = $"https://localhost:7056/api/records/records/encoded/{response.Value}";
         var qrCode = _QRCodeGeneratorService.GenerateQRCodeFromText(recordUrl);
 
         return Created(recordUrl, new { Url = recordUrl, QRCode = qrCode });

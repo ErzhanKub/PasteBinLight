@@ -79,7 +79,7 @@ public sealed class UserRepository : IUserRepository
                 sender = new { name = "Erzhan Kubanchbek uulu", email = "avazov.erjan@gmail.com" },
                 to = new[] { new { email = userEmail } },
                 subject = "Email confirmation",
-                textContent = $"Thank you for registering! Please confirm your email by clicking on the following link: https://localhost:7056/api/User/{token}"
+                textContent = $"Thank you for registering! Please confirm your email by clicking on the following link: https://localhost:7056/api/users/confirm/{token}"
             }), Encoding.UTF8, "application/json")
         };
 
