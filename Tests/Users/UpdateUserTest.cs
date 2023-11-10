@@ -1,8 +1,12 @@
-﻿using Application.Features.Users.Update;
+﻿using Application.Contracts;
+using Application.Features.Records.Create;
+using Application.Features.Users.Update;
 using Application.Shared;
 using Domain.Entities;
 using Domain.Enums;
 using Domain.Repositories;
+using Mapster;
+using Tests.TheoryDataObjects;
 
 namespace Tests.Users
 {
@@ -19,8 +23,9 @@ namespace Tests.Users
             _loggerMock = new Mock<ILogger<UpdateUserByIdCommandHandler>>();
         }
 
-        [Fact]
-        public async Task Handle_ValidCommand_ShouldUpdateUser()
+        [Theory]
+        [ClassData(typeof(UserDtoData))]
+        public async Task Handle_ValidCommand_ShouldUpdateUser(UserDto dto)
         {
             // Arrange
             var user = new User(Guid.NewGuid(), new Username("username"), new Password("password12345"), new Email("test.user@example.com", true), Role.User, default);
@@ -29,10 +34,7 @@ namespace Tests.Users
             var command = new UpdateUserByIdCommand
             {
                 UserId = user.Id,
-                NewUsername = "newUsername",
-                NewPassword = "newPassword",
-                NewEmail = "new@example.com",
-                NewUserRole = (int)Role.Admin
+                Data = dto.Adapt<UpdateUserDto>(),
             };
 
             // Act
@@ -43,10 +45,11 @@ namespace Tests.Users
             _userRepositoryMock.Verify(x => x.Update(It.IsAny<User>()), Times.Once);
             _unitOfWorkMock.Verify(x => x.SaveAndCommitAsync(default), Times.Once);
         }
-       
 
-        [Fact]
-        public async Task Handle_InvalidUser_ShouldReturnFailureResult()
+
+        [Theory]
+        [ClassData(typeof(UserDtoData))]
+        public async Task Handle_InvalidUser_ShouldReturnFailureResult(UserDto dto)
         {
             // Arrange
             _userRepositoryMock.Setup(repo => repo.FetchByIdAsync(It.IsAny<Guid>(), default)).ReturnsAsync((User)null);
@@ -54,10 +57,8 @@ namespace Tests.Users
             var command = new UpdateUserByIdCommand
             {
                 UserId = Guid.NewGuid(),
-                NewUsername = "newUsername",
-                NewPassword = "newPassword",
-                NewEmail = "new@example.com",
-                NewUserRole = (int)Role.Admin
+                Data = dto.Adapt<UpdateUserDto>(),
+              
             };
             // Act
             var result = await handler.Handle(command, default);

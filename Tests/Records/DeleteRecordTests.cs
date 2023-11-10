@@ -40,11 +40,11 @@ namespace Tests.Records
             {
                 Id = userId,
             };
-            var record = new Domain.Entities.Record { Id = Guid.NewGuid(), Url = new Uri("http://example.com") };
+            var record = new Domain.Entities.Record { Id = recordId, Url = new Uri("http://example.com") };
             user.AddRecordToUser(record);
 
             userRepositoryMock.Setup(repo => repo.FetchByIdAsync(userId, cancellationToken)).ReturnsAsync(user);
-            recordRepositoryMock.Setup(repo => repo.RemoveByIdAsync(recordId)).ReturnsAsync(Array.Empty<Guid>());
+            recordRepositoryMock.Setup(repo => repo.RemoveByIdAsync(recordId)).ReturnsAsync(new Guid[] { recordId });
 
             var handler = new DeleteRecordByIdHandler(userRepositoryMock.Object, recordRepositoryMock.Object, unitOfWorkMock.Object, loggerMock.Object, recordCloudServiceMock.Object);
 

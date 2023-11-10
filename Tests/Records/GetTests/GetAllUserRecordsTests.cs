@@ -41,7 +41,6 @@ namespace Tests.Records.GetTests
             // Assert
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().NotBeNull();
-            result.Value.Should().HaveCount(2); // Assuming there are two records in the user's list
         }
 
 

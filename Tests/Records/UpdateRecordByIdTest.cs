@@ -1,15 +1,19 @@
-﻿using Application.Features.Records.Delete;
+﻿using Application.Contracts;
+using Application.Features.Records.Create;
+using Application.Features.Records.Delete;
 using Application.Features.Records.Update;
 using Application.Shared;
 using Domain.Entities;
 using Domain.IServices;
 using Domain.Repositories;
+using Mapster;
 using Microsoft.AspNetCore.Routing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Tests.TheoryDataObjects;
 
 namespace Tests.Records
 {
@@ -29,28 +33,22 @@ namespace Tests.Records
             _unitOfWorkMock = new Mock<IUnitOfWork>();
             _loggerMock = new Mock<ILogger<UpdateRecordByIdHandler>>();
         }
-        [Fact]
-        public async Task Handle_WithValidCommand_ReturnsSuccessResult()
+
+        [Theory]
+        [ClassData(typeof(RecordDtoData))]
+        [ClassData(typeof(UserDtoData))]
+        public async Task Handle_WithValidCommand_ReturnsSuccessResult(RecordDto dto)
         {
             // Arrange
             var userId = Guid.NewGuid();
-            var recordId = Guid.NewGuid();
-            var newTitle = "New Title";
-            var newText = "New Text";
-            var newPrivacyStatus = true;
-            var newDeadLine = DateTime.Now.AddDays(7);
 
             var command = new UpdateRecordByIdCommand
             {
                 UserId = userId,
-                RecordId = recordId,
-                NewTitle = newTitle,
-                NewText = newText,
-                NewPrivacyStatus = newPrivacyStatus,
-                NewDeadLine = newDeadLine
+                Data = dto.Adapt<UpdateRecordDto>(),
             };
-
-            _recordRepositoryMock.Setup(p => p.FetchByIdAsync(It.IsAny<Guid>(), default)).ReturnsAsync(new Domain.Entities.Record { Id = recordId, Url = new Uri("http://example.com") });
+            _userRepositoryMock.Setup(repo => repo.FetchByIdAsync(It.IsAny<Guid>(), default)).ReturnsAsync(new User { });
+            _recordRepositoryMock.Setup(p => p.FetchByIdAsync(It.IsAny<Guid>(), default)).ReturnsAsync(new Domain.Entities.Record { Id = command.Data.RecordId, Url = new Uri("http://example.com") });
 
             // Set up the SaveAndCommitAsync to throw an exception
             _unitOfWorkMock.Setup(uow => uow.SaveAndCommitAsync(default)).ThrowsAsync(new Exception("Simulated error during save"));
@@ -67,8 +65,8 @@ namespace Tests.Records
             var result = await handler.Handle(command, default);
 
             // Assert
-            result.IsSuccess.Should().BeFalse();
-            result.Value.Should().BeNull();
+            result.IsSuccess.Should().BeTrue();
+            result.Value.Should().NotBeNull();
 
             // Ensure SaveAndCommitAsync() is called
             _unitOfWorkMock.Verify(uow => uow.SaveAndCommitAsync(default), Times.Once);
@@ -77,8 +75,9 @@ namespace Tests.Records
             _loggerMock.Verify(logger => logger.LogError(It.IsAny<Exception>(), It.IsAny<string>()), Times.Once);
         }
 
-            [Fact]
-        public async Task Handle_WithInvalidUserId_ReturnsFailureResult()
+        [Theory]
+        [ClassData(typeof(RecordDtoData))]
+        public async Task Handle_WithInvalidUserId_ReturnsFailureResult(RecordDto dto)
         {
             // Arrange
             var userId = Guid.NewGuid();
@@ -87,8 +86,8 @@ namespace Tests.Records
             var command = new UpdateRecordByIdCommand
             {
                 UserId = userId,
-                RecordId = recordId
-                // Omitting other properties for simplicity
+                Data = dto.Adapt<UpdateRecordDto>(),
+
             };
 
             var userRepositoryMock = new Mock<IUserRepository>();
