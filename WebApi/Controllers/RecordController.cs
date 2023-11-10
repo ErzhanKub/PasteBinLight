@@ -35,17 +35,14 @@ public class RecordController : ControllerBase
     [SwaggerOperation(Summary = "Создает новую запись.")]
     [SwaggerResponse(StatusCodes.Status201Created, "Record Created Successfully")]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid Request", typeof(ValidationProblemDetails))]
-    public async Task<IActionResult> CreateRecord(string? title, string text, DateTime deadline, bool isPrivate)
+    public async Task<IActionResult> CreateRecord(CreateRecordDto record)
     {
         var currentUser = HttpContext.User;
 
         var command = new CreateRecordCommand
         {
             UserId = UserServices.GetCurrentUserId(currentUser),
-            Title = title,
-            Text = text,
-            DeadLine = deadline,
-            IsPrivate = isPrivate
+            Data = record,
         };
 
         var response = await _mediator.Send(command);

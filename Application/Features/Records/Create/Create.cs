@@ -6,6 +6,11 @@ namespace Application.Features.Records.Create
     public record CreateRecordCommand : IRequest<Result<string>>
     {
         public Guid UserId { get; set; }
+        public CreateRecordDto? Data { get; set; }
+    }
+
+    public record CreateRecordDto
+    {
         public required string Text { get; init; }
         public string? Title { get; init; }
         public DateTime DeadLine { get; init; }
@@ -18,9 +23,14 @@ namespace Application.Features.Records.Create
         public CreateRecordCommandValidator()
         {
             RuleFor(u => u.UserId).NotEmpty();
-            RuleFor(t => t.Text).NotEmpty().Length(1, 4000);
-            RuleFor(t => t.Title).Length(1, 200);
-            RuleFor(d => d.DeadLine).GreaterThanOrEqualTo(DateTime.Now);
+            RuleFor(u => u.Data).NotNull();
+
+            When(u => u.Data != null, () =>
+            {
+                RuleFor(t => t.Data!.Text).NotEmpty().Length(1, 4000);
+                RuleFor(t => t.Data!.Title).Length(1, 200);
+                RuleFor(d => d.Data!.DeadLine).GreaterThanOrEqualTo(DateTime.Now);
+            });
         }
     }
 
@@ -63,7 +73,7 @@ namespace Application.Features.Records.Create
 
                 var recordId = Guid.NewGuid();
 
-                var urlCloud = await _recordCloudService.UploadTextFileToCloudAsync(recordId.ToString(), request.Text);
+                var urlCloud = await _recordCloudService.UploadTextFileToCloudAsync(recordId.ToString(), request.Data!.Text);
 
                 _logger.LogInformation(LoadingTextMessage, recordId);
 
@@ -71,9 +81,9 @@ namespace Application.Features.Records.Create
                 {
                     Id = recordId,
                     DateCreated = DateTime.Now,
-                    DeadLine = request.DeadLine,
-                    IsPrivate = request.IsPrivate,
-                    Title = request.Title,
+                    DeadLine = request.Data!.DeadLine,
+                    IsPrivate = request.Data!.IsPrivate,
+                    Title = request.Data!.Title,
                     Url = new Uri(urlCloud),
                     User = user,
                     UserId = user.Id,

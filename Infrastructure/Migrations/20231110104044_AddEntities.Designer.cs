@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231109174846_AddEntities")]
+    [Migration("20231110104044_AddEntities")]
     partial class AddEntities
     {
         /// <inheritdoc />
@@ -65,15 +65,15 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("22f1f883-46c5-4572-81e8-dbf19c74c12f"),
-                            DateCreated = new DateTime(2023, 11, 9, 23, 48, 46, 223, DateTimeKind.Local).AddTicks(168),
-                            DeadLine = new DateTime(2023, 12, 9, 23, 48, 46, 223, DateTimeKind.Local).AddTicks(184),
+                            Id = new Guid("a3af1c84-8977-474e-b475-524f96499018"),
+                            DateCreated = new DateTime(2023, 11, 10, 16, 40, 44, 849, DateTimeKind.Local).AddTicks(9712),
+                            DeadLine = new DateTime(2023, 12, 10, 16, 40, 44, 849, DateTimeKind.Local).AddTicks(9730),
                             DisLikes = 13L,
                             IsPrivate = false,
                             Likes = 183L,
                             Title = "My day",
                             Url = "https://www.youtube.com/",
-                            UserId = new Guid("ad420878-46b9-4626-b647-c468a7dadaa6")
+                            UserId = new Guid("7a3fad07-ec50-42ec-bd8c-c083b9f342b8")
                         });
                 });
 
@@ -112,7 +112,7 @@ namespace Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("ad420878-46b9-4626-b647-c468a7dadaa6"),
+                            Id = new Guid("7a3fad07-ec50-42ec-bd8c-c083b9f342b8"),
                             ConfirmationToken = "ConfirmToken",
                             Email = "string@mail.com",
                             Password = "b4923143305b8c19f5c5031c406be92b99ce221e00c795598356d9fc0fc117bc",
