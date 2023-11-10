@@ -88,4 +88,9 @@ public sealed class RecordRepository : IRecordRepository
             .Take(100)
             .ToListAsync(cancellationToken);
     }
+
+    public Task<List<Record>> GetAllRecords(CancellationToken cancellationToken)
+    {
+        return _dbcontext.Records.AsNoTracking().ToListAsync(cancellationToken);
+    }
 }

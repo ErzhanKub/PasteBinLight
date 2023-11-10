@@ -7,7 +7,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace WebApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/auth")]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -47,7 +47,7 @@ namespace WebApi.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [SwaggerOperation(Summary = "Login.")]
+        [SwaggerOperation(Summary = "Войти в систему")]
         [SwaggerResponse(StatusCodes.Status200OK, "Login successful")]
         [SwaggerResponse(StatusCodes.Status401Unauthorized, "Invalid Request", typeof(ValidationProblemDetails))]
         public async Task<IActionResult> CreateSession(UserLoginRequest request)

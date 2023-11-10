@@ -13,10 +13,9 @@ using WebApi.Services;
 
 namespace WebApi.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/users")]
 [ApiController]
 [Produces("application/json")]
-[Authorize(Roles = "Admin")]
 public class UserController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -30,7 +29,8 @@ public class UserController : ControllerBase
         _telegramService = telegramService;
     }
 
-    [HttpPut("users/{id}")]
+    [Authorize(Roles = "Admin")]
+    [HttpPut("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Обновляет пользователя по Id.")]
@@ -52,7 +52,7 @@ public class UserController : ControllerBase
     }
 
     [Authorize(Roles = "User, Admin")]
-    [HttpPut("users/me")]
+    [HttpPut("me")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Обновляет текущего пользователя.")]
@@ -82,7 +82,8 @@ public class UserController : ControllerBase
         return NotFound(response.Reasons);
     }
 
-    [HttpGet("users/{userId}")]
+    [Authorize(Roles = "User, Admin")]
+    [HttpGet("{userId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Получает пользователя по Id.")]
@@ -108,7 +109,8 @@ public class UserController : ControllerBase
         return NotFound(response.Reasons);
     }
 
-    [HttpGet("users/username/{username}")]
+    [Authorize(Roles = "User, Admin")]
+    [HttpGet("username/{username}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Получает пользователя по username.")]
@@ -131,7 +133,8 @@ public class UserController : ControllerBase
         return NotFound(response.Reasons);
     }
 
-    [HttpGet("users")]
+    [Authorize(Roles = "User, Admin")]
+    [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Получает всех пользователей.")]
@@ -152,7 +155,8 @@ public class UserController : ControllerBase
         return NotFound(reponse.Reasons);
     }
 
-    [HttpDelete("users")]
+    [Authorize(Roles = "Admin")]
+    [HttpDelete]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Удаляет пользователя по Id.")]
@@ -173,8 +177,8 @@ public class UserController : ControllerBase
         return NotFound(response.Reasons);
     }
 
-    [Authorize(Roles = "User, Admin")]
-    [HttpDelete("users/me")]
+    [Authorize(Roles = "Admin")]
+    [HttpDelete("me/{username}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Удаляет пользователя по Username.")]
