@@ -4,6 +4,7 @@ using Application.Features.Records.Get;
 using Application.Features.Records.Update;
 using Domain.IServices;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebApi.Services;
@@ -34,17 +35,14 @@ public class RecordController : ControllerBase
     [SwaggerOperation(Summary = "Создает новую запись.")]
     [SwaggerResponse(StatusCodes.Status201Created, "Record Created Successfully")]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid Request", typeof(ValidationProblemDetails))]
-    public async Task<IActionResult> CreateRecord(string? title, string text, DateTime deadline, bool isPrivate)
+    public async Task<IActionResult> CreateRecord(CreateRecordDto record)
     {
         var currentUser = HttpContext.User;
 
         var command = new CreateRecordCommand
         {
             UserId = UserServices.GetCurrentUserId(currentUser),
-            Title = title,
-            Text = text,
-            DeadLine = deadline,
-            IsPrivate = isPrivate
+            Data = record,
         };
 
         var response = await _mediator.Send(command);
@@ -201,19 +199,17 @@ public class RecordController : ControllerBase
     [SwaggerOperation(Summary = "Изменение записи по ID.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Successful Record Change")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(ValidationProblemDetails))]
-    public async Task<IActionResult> Update(Guid recordId, string? title, DateTime deadline, string? text, bool isPrivate)
+    public async Task<IActionResult> Update(UpdateRecordDto record)
     {
         var user = HttpContext.User;
         var userId = UserServices.GetCurrentUserId(user);
+
         var request = new UpdateRecordByIdCommand
         {
             UserId = userId,
-            RecordId = recordId,
-            NewTitle = title,
-            NewDeadLine = deadline,
-            NewPrivacyStatus = isPrivate,
-            NewText = text,
+            Data = record
         };
+
         var response = await _mediator.Send(request);
         if (response.IsSuccess)
         {

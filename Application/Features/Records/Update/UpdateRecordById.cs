@@ -5,7 +5,12 @@ namespace Application.Features.Records.Update
     // Class to handle the command for updating a record by ID
     public record UpdateRecordByIdCommand : IRequest<Result<RecordDto>>
     {
-        public Guid UserId { get; set; }
+        public Guid UserId { get; init; }
+        public UpdateRecordDto? Data { get; init; }
+    }
+
+    public record UpdateRecordDto
+    {
         public Guid RecordId { get; init; }
         public string? NewTitle { get; init; }
         public string? NewText { get; init; }
@@ -19,10 +24,13 @@ namespace Application.Features.Records.Update
         public UpdateRecordByIdValidator()
         {
             RuleFor(u => u.UserId).NotEmpty();
-            RuleFor(p => p.RecordId).NotEmpty();
-            RuleFor(p => p.NewTitle).Length(1, 200);
-            RuleFor(p => p.NewText).Length(1, 4000);
-            RuleFor(p => p.NewDeadLine).GreaterThanOrEqualTo(DateTime.Now);
+
+            When(u => u.Data != null, () =>
+            {
+                RuleFor(t => t.Data!.NewText).NotEmpty().Length(1, 4000);
+                RuleFor(t => t.Data!.NewTitle).Length(1, 200);
+                RuleFor(d => d.Data!.NewDeadLine).GreaterThanOrEqualTo(DateTime.Now);
+            });
         }
     }
 
@@ -60,7 +68,7 @@ namespace Application.Features.Records.Update
                     return Result.Fail(UserNotFoundMessage);
                 }
 
-                var record = user.Records.FirstOrDefault(p => p.Id == request.RecordId);
+                var record = user.Records.FirstOrDefault(p => p.Id == request.Data!.RecordId);
 
                 if (record is null)
                 {
@@ -68,13 +76,13 @@ namespace Application.Features.Records.Update
                     return Result.Fail(RecordNotFoundMessage);
                 }
 
-                if (request.NewTitle is not null)
-                    record.Title = request.NewTitle;
+                if (request.Data!.NewTitle is not null)
+                    record.Title = request.Data!.NewTitle;
 
-                record.DeadLine = request.NewDeadLine;
-                record.IsPrivate = request.NewPrivacyStatus;
+                record.DeadLine = request.Data!.NewDeadLine;
+                record.IsPrivate = request.Data!.NewPrivacyStatus;
 
-                await _recordCloudService.UpdateTextFileInCloudAsync(record.Id.ToString(), request.NewText ?? string.Empty);
+                await _recordCloudService.UpdateTextFileInCloudAsync(record.Id.ToString(), request.Data!.NewText ?? string.Empty);
 
                 _recordRepo.Update(record);
                 await _unitOfWork.SaveAndCommitAsync(cancellationToken);
@@ -82,10 +90,10 @@ namespace Application.Features.Records.Update
                 var response = new RecordDto
                 {
                     Id = record.Id,
-                    DeadLine = request.NewDeadLine,
-                    Text = request.NewText ?? string.Empty,
-                    Title = request.NewTitle,
-                    IsPrivate = request.NewPrivacyStatus,
+                    DeadLine = request.Data!.NewDeadLine,
+                    Text = request.Data!.NewText ?? string.Empty,
+                    Title = request.Data!.NewTitle,
+                    IsPrivate = request.Data!.NewPrivacyStatus,
                     DateCreated= DateTime.Now,
                 };
 

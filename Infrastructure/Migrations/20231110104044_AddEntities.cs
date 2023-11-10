@@ -55,12 +55,12 @@ namespace Infrastructure.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "Id", "ConfirmationToken", "Email", "Password", "Role", "Username" },
-                values: new object[] { new Guid("ad420878-46b9-4626-b647-c468a7dadaa6"), "ConfirmToken", "string@mail.com", "b4923143305b8c19f5c5031c406be92b99ce221e00c795598356d9fc0fc117bc", 2, "SuperAdmin2077CP" });
+                values: new object[] { new Guid("7a3fad07-ec50-42ec-bd8c-c083b9f342b8"), "ConfirmToken", "string@mail.com", "b4923143305b8c19f5c5031c406be92b99ce221e00c795598356d9fc0fc117bc", 2, "SuperAdmin2077CP" });
 
             migrationBuilder.InsertData(
                 table: "Records",
                 columns: new[] { "Id", "DateCreated", "DeadLine", "DisLikes", "IsPrivate", "Likes", "Title", "Url", "UserId" },
-                values: new object[] { new Guid("22f1f883-46c5-4572-81e8-dbf19c74c12f"), new DateTime(2023, 11, 9, 23, 48, 46, 223, DateTimeKind.Local).AddTicks(168), new DateTime(2023, 12, 9, 23, 48, 46, 223, DateTimeKind.Local).AddTicks(184), 13L, false, 183L, "My day", "https://www.youtube.com/", new Guid("ad420878-46b9-4626-b647-c468a7dadaa6") });
+                values: new object[] { new Guid("a3af1c84-8977-474e-b475-524f96499018"), new DateTime(2023, 11, 10, 16, 40, 44, 849, DateTimeKind.Local).AddTicks(9712), new DateTime(2023, 12, 10, 16, 40, 44, 849, DateTimeKind.Local).AddTicks(9730), 13L, false, 183L, "My day", "https://www.youtube.com/", new Guid("7a3fad07-ec50-42ec-bd8c-c083b9f342b8") });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Records_UserId",
