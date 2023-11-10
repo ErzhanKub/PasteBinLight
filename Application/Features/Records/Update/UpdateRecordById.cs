@@ -37,9 +37,9 @@ namespace Application.Features.Records.Update
     // Handler class for the UpdateRecordByIdCommand
     public sealed class UpdateRecordByIdHandler : IRequestHandler<UpdateRecordByIdCommand, Result<RecordDto>>
     {
-        private readonly IRecordRepository _recordRepo;
+        private readonly IRecordRepository _recordRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IUserRepository _userRepo;
+        private readonly IUserRepository _userRepository;
         private readonly IRecordCloudService _recordCloudService;
         private readonly ILogger<UpdateRecordByIdHandler> _logger;
 
@@ -48,11 +48,11 @@ namespace Application.Features.Records.Update
         private const string DataChangedMessage = "Data changed, Record: {id}";
         private const string ErrorMessage = "An error occurred while changing the text";
 
-        public UpdateRecordByIdHandler(IRecordRepository recordRepo, IUnitOfWork unitOfWork, IUserRepository userRepo, ILogger<UpdateRecordByIdHandler> logger, IRecordCloudService recordCloudService)
+        public UpdateRecordByIdHandler(IRecordRepository recordRepository, IUnitOfWork unitOfWork, IUserRepository userRepository, ILogger<UpdateRecordByIdHandler> logger, IRecordCloudService recordCloudService)
         {
-            _recordRepo = recordRepo ?? throw new ArgumentNullException(nameof(recordRepo));
+            _recordRepository = recordRepository ?? throw new ArgumentNullException(nameof(recordRepository));
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-            _userRepo = userRepo ?? throw new ArgumentNullException(nameof(userRepo));
+            _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _recordCloudService = recordCloudService ?? throw new ArgumentNullException(nameof(recordCloudService));
         }
@@ -61,7 +61,7 @@ namespace Application.Features.Records.Update
         {
             try
             {
-                var user = await _userRepo.FetchByIdAsync(request.UserId, cancellationToken);
+                var user = await _userRepository.FetchByIdAsync(request.UserId, cancellationToken);
                 if (user is null)
                 {
                     _logger.LogWarning(UserNotFoundMessage);
@@ -84,7 +84,7 @@ namespace Application.Features.Records.Update
 
                 await _recordCloudService.UpdateTextFileInCloudAsync(record.Id.ToString(), request.Data!.NewText ?? string.Empty);
 
-                _recordRepo.Update(record);
+                _recordRepository.Update(record);
                 await _unitOfWork.SaveAndCommitAsync(cancellationToken);
 
                 var response = new RecordDto

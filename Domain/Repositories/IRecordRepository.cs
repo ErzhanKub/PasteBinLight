@@ -18,5 +18,8 @@ namespace Domain.Repositories
         // Find records by their title
         Task<IReadOnlyList<Record>> FindRecordsByTitleAsync(string title, CancellationToken cancellationToken);
         Task<List<Record>> GetAllRecords(CancellationToken cancellationToken);
+        void ToLike(Record entity); 
+        void ToDislike(Record entity);
+
     }
 }

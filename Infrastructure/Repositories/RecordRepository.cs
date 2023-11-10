@@ -93,4 +93,14 @@ public sealed class RecordRepository : IRecordRepository
     {
         return _dbcontext.Records.AsNoTracking().ToListAsync(cancellationToken);
     }
+
+    public void ToLike(Record entity)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void ToDislike(Record entity)
+    {
+        throw new NotImplementedException();
+    }
 }

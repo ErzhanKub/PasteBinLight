@@ -20,7 +20,7 @@ namespace Application.Features.Records.Get
 
         public GetAllRecordsHandler(IRecordRepository recordRepository)
         {
-            _recordRepository = recordRepository;
+            _recordRepository = recordRepository ?? throw new ArgumentNullException(nameof(recordRepository)); ;
         }
 
         public async Task<Result<List<AllRecordsDto>>> Handle(GetAllRecordsRequest request, CancellationToken cancellationToken)
