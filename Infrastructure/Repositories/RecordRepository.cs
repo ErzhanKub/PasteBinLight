@@ -74,7 +74,7 @@ public sealed class RecordRepository : IRecordRepository
     // Search records by title
     public async Task<IReadOnlyList<Record>> FindRecordsByTitleAsync(string title, CancellationToken cancellationToken)
     {
-        var records = await _dbcontext.Records.Where(r => r.Title.Contains(title) && r.IsPrivate == false).ToListAsync(cancellationToken) ?? new List<Record>();
+        var records = await _dbcontext.Records.Where(r => r.Title!.Contains(title) && r.IsPrivate == false).ToListAsync(cancellationToken) ?? new List<Record>();
         return records;
     }
 
@@ -96,11 +96,11 @@ public sealed class RecordRepository : IRecordRepository
 
     public void ToLike(Record entity)
     {
-        throw new NotImplementedException();
+        _dbcontext.Records.Update(entity);
     }
 
     public void ToDislike(Record entity)
     {
-        throw new NotImplementedException();
+        _dbcontext.Records.Update(entity);
     }
 }

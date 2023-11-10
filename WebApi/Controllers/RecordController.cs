@@ -221,6 +221,62 @@ public class RecordController : ControllerBase
         return BadRequest(response.Reasons);
     }
 
+    // Endpoint to Like for record
+    [HttpPut("records/like/{recordId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [SwaggerOperation(Summary = "Поставить лайк записи")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Successful Record Change")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(ValidationProblemDetails))]
+    public async Task<IActionResult> ToLikeRecord(ToLikeDto record)
+    {
+        var user = HttpContext.User;
+        var userId = UserServices.GetCurrentUserId(user);
+
+        var request = new ToLikeCommand
+        {
+            UserId = userId,
+            Data = record
+        };
+
+        var response = await _mediator.Send(request);
+        if (response.IsSuccess)
+        {
+            _logger.LogInformation("Successful Record Change");
+            return Ok(response.Value);
+        }
+        _logger.LogError("Failed to change record: {Reasons}", response.Reasons);
+        return BadRequest(response.Reasons);
+    }
+
+    // Endpoint to Dislike for record
+    [HttpPut("records/dislike/{recordId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [SwaggerOperation(Summary = "Поставить дизлайк записи")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Successful Record Change")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(ValidationProblemDetails))]
+    public async Task<IActionResult> ToDisLikeRecord(ToDislikeDto record)
+    {
+        var user = HttpContext.User;
+        var userId = UserServices.GetCurrentUserId(user);
+
+        var request = new ToDislikeCommand
+        {
+            UserId = userId,
+            Data = record
+        };
+
+        var response = await _mediator.Send(request);
+        if (response.IsSuccess)
+        {
+            _logger.LogInformation("Successful Record Change");
+            return Ok(response.Value);
+        }
+        _logger.LogError("Failed to change record: {Reasons}", response.Reasons);
+        return BadRequest(response.Reasons);
+    }
+
     // Endpoint to get top 100 records
     [HttpGet("records/popularity")]
     [ProducesResponseType(StatusCodes.Status200OK)]
