@@ -3,16 +3,16 @@ using Application.Shared;
 using Domain.Entities;
 using Domain.Repositories;
 
-namespace Tests.Users
+namespace Tests.Users.DeleteUserTests
 {
-    public class DeleteUserTest
+    public class DeleteUserByIdTest
     {
 
         private readonly Mock<IUserRepository> _userRepositoryMock;
         private readonly Mock<IUnitOfWork> _unitOfWorkMock;
         private readonly Mock<ILogger<DeleteUsersByIdsHandler>> _loggerMock;
 
-        public DeleteUserTest()
+        public DeleteUserByIdTest()
         {
             _userRepositoryMock = new Mock<IUserRepository>();
             _unitOfWorkMock = new Mock<IUnitOfWork>();
@@ -29,7 +29,7 @@ namespace Tests.Users
             };
             var handler = new DeleteUsersByIdsHandler(_userRepositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object);
 
-            _userRepositoryMock.Setup(x => x.DeleteRangeAsync(It.IsAny<Guid[]>()))
+            _userRepositoryMock.Setup(x => x.DeleteByIdAsync(It.IsAny<Guid[]>()))
                 .ReturnsAsync(command.Id);
 
             // Act
@@ -38,7 +38,7 @@ namespace Tests.Users
             // Assert
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().BeEquivalentTo(command.Id);
-            _userRepositoryMock.Verify(x => x.DeleteRangeAsync(It.IsAny<Guid[]>()), Times.Once);
+            _userRepositoryMock.Verify(x => x.DeleteByIdAsync(It.IsAny<Guid[]>()), Times.Once);
             _unitOfWorkMock.Verify(x => x.SaveCommitAsync(), Times.Once);
         }
     }

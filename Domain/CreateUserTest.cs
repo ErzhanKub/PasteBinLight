@@ -3,7 +3,6 @@ using Application.Shared;
 using Domain.Entities;
 using Domain.Repositories;
 
-
 namespace Tests.Users;
 
 public class CreateUserTest
