@@ -74,8 +74,9 @@ public sealed class User : BaseEntity
         {
             Role = role;
         }
-    }
+    
 
     // Domain event for when a user is created
     public sealed record UserCreatedDomainEvent(Guid UserId) : IDomainEvent;
 }
+

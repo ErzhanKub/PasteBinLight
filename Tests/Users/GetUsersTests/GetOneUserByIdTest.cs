@@ -14,12 +14,12 @@ namespace Tests.Users
     public class GetOneUserByIdTest
     {
         private readonly Mock<IUserRepository> _userRepositoryMock;
-        private readonly Mock<ILogger<GetOneUserRequestHandler>> _loggerMock;
+        private readonly Mock<ILogger<FetchUserByIdHandler>> _loggerMock;
 
         public GetOneUserByIdTest()
         {
             _userRepositoryMock = new Mock<IUserRepository>();
-            _loggerMock = new Mock<ILogger<GetOneUserRequestHandler>>();
+            _loggerMock = new Mock<ILogger<FetchUserByIdHandler>>();
         }
 
         [Fact]
@@ -27,11 +27,11 @@ namespace Tests.Users
         {
             // Arrange
             var userId = Guid.NewGuid();
-            var handler = new GetOneUserRequestHandler(_userRepositoryMock.Object, _loggerMock.Object);
-            var request = new GetOneUserRequest { Id = userId };
+            var handler = new FetchUserByIdHandler(_userRepositoryMock.Object, _loggerMock.Object);
+            var request = new FetchUserByIdRequest { UserId = userId };
             var user = new User(Guid.NewGuid(), new Username("username"), new Password("password12345"), new Email("test.user@example.com", true), Role.User, default);
             
-            _userRepositoryMock.Setup(x => x.GetByIdAsync(userId))
+            _userRepositoryMock.Setup(x => x.FetchByIdAsync(userId, default))
                 .ReturnsAsync(user);
 
             // Act
@@ -39,24 +39,24 @@ namespace Tests.Users
 
             // Assert
             result.IsSuccess.Should().BeTrue();
-            _userRepositoryMock.Verify(x => x.GetByIdAsync(It.IsAny<Guid>()), Times.Once);
+            _userRepositoryMock.Verify(x => x.FetchByIdAsync(It.IsAny<Guid>(), default), Times.Once);
         }
 
         [Fact]
         public async Task Handle_InvalidRequest_ShouldReturnFailure()
         {
             // Arrange
-            var handler = new GetOneUserRequestHandler(_userRepositoryMock.Object, _loggerMock.Object);
+            var handler = new FetchUserByIdHandler(_userRepositoryMock.Object, _loggerMock.Object);
 
-            _userRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>()))
+            _userRepositoryMock.Setup(x => x.FetchByIdAsync(It.IsAny<Guid>(), default))
                 .ReturnsAsync((User)null!);
 
             // Act
-            var result = await handler.Handle(new GetOneUserRequest { Id = Guid.NewGuid() }, default);
+            var result = await handler.Handle(new FetchUserByIdRequest { UserId = Guid.NewGuid() }, default);
 
             // Assert
             result.IsFailed.Should().BeTrue();
-            _userRepositoryMock.Verify(x => x.GetByIdAsync(It.IsAny<Guid>()), Times.Once());
+            _userRepositoryMock.Verify(x => x.FetchByIdAsync(It.IsAny<Guid>(), default), Times.Once());
         }
 
     }

@@ -25,21 +25,21 @@ namespace Tests.Users.DeleteUserTests
             // Arrange
             var command = new DeleteUsersByIdsCommand
             {
-                Id = new Guid[] { Guid.NewGuid() }
+                UserIds = new Guid[] { Guid.NewGuid() }
             };
             var handler = new DeleteUsersByIdsHandler(_userRepositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object);
 
-            _userRepositoryMock.Setup(x => x.DeleteByIdAsync(It.IsAny<Guid[]>()))
-                .ReturnsAsync(command.Id);
+            _userRepositoryMock.Setup(x => x.RemoveByIdAsync(It.IsAny<Guid[]>()))
+                .ReturnsAsync(command.UserIds);
 
             // Act
             var result = await handler.Handle(command, default);
 
             // Assert
             result.IsSuccess.Should().BeTrue();
-            result.Value.Should().BeEquivalentTo(command.Id);
-            _userRepositoryMock.Verify(x => x.DeleteByIdAsync(It.IsAny<Guid[]>()), Times.Once);
-            _unitOfWorkMock.Verify(x => x.SaveCommitAsync(), Times.Once);
+            result.Value.Should().BeEquivalentTo(command.UserIds);
+            _userRepositoryMock.Verify(x => x.RemoveByIdAsync(It.IsAny<Guid[]>()), Times.Once);
+            _unitOfWorkMock.Verify(x => x.SaveAndCommitAsync(default), Times.Once);
         }
     }
 }

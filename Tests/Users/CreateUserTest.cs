@@ -41,7 +41,7 @@ public class CreateUserTest
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        _userRepositoryMock.Verify(x => x.CreateAsync(It.IsAny<User>()), Times.Once);
-        _unitOfWorkMock.Verify(x => x.SaveCommitAsync(), Times.Once);
+        _userRepositoryMock.Verify(x => x.CreateAsync(It.IsAny<User>(), default), Times.Once);
+        _unitOfWorkMock.Verify(x => x.SaveAndCommitAsync(default), Times.Once);
     }
 }

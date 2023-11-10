@@ -13,12 +13,12 @@ namespace Tests.Users.GetUsersTests
     public class GetOneUserByNameTests
     {
         private readonly Mock<IUserRepository> _userRepositoryMock;
-        private readonly Mock<ILogger<GetOneUserRequestHandler>> _loggerMock;
+        private readonly Mock<ILogger<FetchUserByUsernameHandler>> _loggerMock;
 
         public GetOneUserByNameTests()
         {
             _userRepositoryMock = new Mock<IUserRepository>();
-            _loggerMock = new Mock<ILogger<GetOneUserRequestHandler>>();
+            _loggerMock = new Mock<ILogger<FetchUserByUsernameHandler>>();
         }
 
         [Fact]
@@ -26,11 +26,11 @@ namespace Tests.Users.GetUsersTests
         {
             // Arrange
             var userName = "user123";
-            var handler = new GetUserByUsernameRequestHandler(_userRepositoryMock.Object, _loggerMock.Object);
-            var request = new GetUserByUsernameRequest { Username = userName };
+            var handler = new FetchUserByUsernameHandler(_userRepositoryMock.Object, _loggerMock.Object);
+            var request = new FetchUserByUsernameRequest { TargetUsername = userName };
             var user = new User(Guid.NewGuid(), new Username("username"), new Password("password12345"), new Email("test.user@example.com", true), Role.User, default);
 
-            _userRepositoryMock.Setup(x => x.GetByUsernameAsync(userName))
+            _userRepositoryMock.Setup(x => x.FetchUserByUsernameAsync(userName, default))
                 .ReturnsAsync(user);
 
             // Act
@@ -38,24 +38,24 @@ namespace Tests.Users.GetUsersTests
 
             // Assert
             result.IsSuccess.Should().BeTrue();
-            _userRepositoryMock.Verify(x => x.GetByUsernameAsync(userName), Times.Once);
+            _userRepositoryMock.Verify(x => x.FetchUserByUsernameAsync(userName, default), Times.Once);
         }
 
         [Fact]
         public async Task Handle_InvalidRequest_ShouldReturnFailure()
         {
             // Arrange
-            var handler = new GetUserByUsernameRequestHandler(_userRepositoryMock.Object, _loggerMock.Object);
+            var handler = new FetchUserByUsernameHandler(_userRepositoryMock.Object, _loggerMock.Object);
 
-            _userRepositoryMock.Setup(x => x.GetByUsernameAsync(It.IsAny<string>()))
+            _userRepositoryMock.Setup(x => x.FetchUserByUsernameAsync(It.IsAny<string>(), default))
                 .ReturnsAsync((User)null!);
 
             // Act
-            var result = await handler.Handle(new GetUserByUsernameRequest { Username = null }, default);
+            var result = await handler.Handle(new FetchUserByUsernameRequest { TargetUsername = null }, default);
 
             // Assert
             result.IsFailed.Should().BeTrue();
-            _userRepositoryMock.Verify(x => x.GetByUsernameAsync(It.IsAny<string>()), Times.Once());
+            _userRepositoryMock.Verify(x => x.FetchUserByUsernameAsync(It.IsAny<string>(), default), Times.Once());
         }
     }
 }

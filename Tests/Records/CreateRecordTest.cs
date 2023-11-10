@@ -48,9 +48,9 @@ namespace Tests.Records
             };
             var user = new User(Guid.NewGuid(), new Username("username"), new Password("password12345"), new Email("test.user@example.com", true), Role.User, default);
 
-            _userRepositoryMock.Setup(repo => repo.GetByIdAsync(userId)).ReturnsAsync(user);
-            _recordCloudServiceMock.Setup(service => service.UploadTextToCloudAsync(It.IsAny<string>(), text)).ReturnsAsync("sampleUrl");
-            _recordRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Record>())).ReturnsAsync(Guid.NewGuid());
+            _userRepositoryMock.Setup(repo => repo.FetchByIdAsync(userId, default)).ReturnsAsync(user);
+            _recordCloudServiceMock.Setup(service => service.UploadTextFileToCloudAsync(It.IsAny<string>(), text)).ReturnsAsync("sampleUrl");
+            _recordRepositoryMock.Setup(repo => repo.CreateAsync(It.IsAny<Record>(), default)).ReturnsAsync(Guid.NewGuid());
 
             // Act
             var result = await handler.Handle(command, default);
@@ -61,22 +61,16 @@ namespace Tests.Records
             result.IsSuccess.Should().BeTrue();
             result.Value.Should().NotBeNull();
 
-            // Verify that GetByIdAsync was called with the correct userId
-            _userRepositoryMock.Verify(repo => repo.GetByIdAsync(userId), Times.Once);
+            _userRepositoryMock.Verify(repo => repo.FetchByIdAsync(userId, default), Times.Once);
 
-            // Verify that UploadTextToCloudAsync was called with the correct parameters
-            _recordCloudServiceMock.Verify(service => service.UploadTextToCloudAsync(It.IsAny<string>(), text), Times.Once);
+            _recordCloudServiceMock.Verify(service => service.UploadTextFileToCloudAsync(It.IsAny<string>(), text), Times.Once);
 
-            // Verify that CreateAsync was called with the correct record
-            _recordRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<Domain.Entities.Record>()), Times.Once);
+            _recordRepositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<Domain.Entities.Record>(), default), Times.Once);
 
-            // Verify that Update was called on the UserRepository
             _userRepositoryMock.Verify(repo => repo.Update(It.IsAny<User>()), Times.Once);
 
-            // Verify that SaveCommitAsync was called to save changes
-            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveCommitAsync(), Times.Once);
+            _unitOfWorkMock.Verify(unitOfWork => unitOfWork.SaveAndCommitAsync(default), Times.Once);
 
-            // Verify that logging information was recorded
             _loggerMock.Verify(logger => logger.LogInformation(It.IsAny<string>(), It.IsAny<object[]>()), Times.Exactly(3));
         }
 

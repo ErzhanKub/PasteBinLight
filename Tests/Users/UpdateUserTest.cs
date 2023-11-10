@@ -24,15 +24,15 @@ namespace Tests.Users
         {
             // Arrange
             var user = new User(Guid.NewGuid(), new Username("username"), new Password("password12345"), new Email("test.user@example.com", true), Role.User, default);
-            _userRepositoryMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(user);
+            _userRepositoryMock.Setup(x => x.FetchByIdAsync(It.IsAny<Guid>(), default)).ReturnsAsync(user);
             var handler = new UpdateUserByIdCommandHandler(_userRepositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object);
             var command = new UpdateUserByIdCommand
             {
-                Id = user.Id,
-                Username = "newUsername",
-                Password = "newPassword",
-                Email = "new@example.com",
-                UserRole = (int)Role.Admin
+                UserId = user.Id,
+                NewUsername = "newUsername",
+                NewPassword = "newPassword",
+                NewEmail = "new@example.com",
+                NewUserRole = (int)Role.Admin
             };
 
             // Act
@@ -41,7 +41,7 @@ namespace Tests.Users
             // Assert
             result.IsSuccess.Should().BeTrue();
             _userRepositoryMock.Verify(x => x.Update(It.IsAny<User>()), Times.Once);
-            _unitOfWorkMock.Verify(x => x.SaveCommitAsync(), Times.Once);
+            _unitOfWorkMock.Verify(x => x.SaveAndCommitAsync(default), Times.Once);
         }
        
 
@@ -49,15 +49,15 @@ namespace Tests.Users
         public async Task Handle_InvalidUser_ShouldReturnFailureResult()
         {
             // Arrange
-            _userRepositoryMock.Setup(repo => repo.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync((User)null);
+            _userRepositoryMock.Setup(repo => repo.FetchByIdAsync(It.IsAny<Guid>(), default)).ReturnsAsync((User)null);
             var handler = new UpdateUserByIdCommandHandler(_userRepositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object);
             var command = new UpdateUserByIdCommand
             {
-                Id = Guid.NewGuid(),
-                Username = "newUsername",
-                Password = "newPassword",
-                Email = "new@example.com",
-                UserRole = (int)Role.Admin
+                UserId = Guid.NewGuid(),
+                NewUsername = "newUsername",
+                NewPassword = "newPassword",
+                NewEmail = "new@example.com",
+                NewUserRole = (int)Role.Admin
             };
             // Act
             var result = await handler.Handle(command, default);
@@ -65,7 +65,7 @@ namespace Tests.Users
             // Assert
             result.IsSuccess.Should().BeFalse();
             _userRepositoryMock.Verify(x => x.Update(It.IsAny<User>()), Times.Never);
-            _unitOfWorkMock.Verify(x => x.SaveCommitAsync(), Times.Never);
+            _unitOfWorkMock.Verify(x => x.SaveAndCommitAsync(default), Times.Never);
         }
 
     }
