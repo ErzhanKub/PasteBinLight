@@ -36,27 +36,18 @@ public class UserController : ControllerBase
     [SwaggerOperation(Summary = "Обновляет пользователя по Id.")]
     [SwaggerResponse(StatusCodes.Status200OK, "User successfully updated")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ValidationProblemDetails))]
-    public async Task<IActionResult> UpdateUserById(Guid id, string? username, string? password, string? email, int userRole)
+    public async Task<IActionResult> UpdateUserById(UpdateUserByIdCommand command)
     {
-        var request = new UpdateUserByIdCommand
-        {
-            UserId = id,
-            NewUsername = username,
-            NewPassword = password,
-            NewEmail = email,
-            NewUserRole = userRole,
-        };
-
-        _logger.LogInformation("Updating user by Id: {Id}", id);
-        var response = await _mediator.Send(request);
+        _logger.LogInformation("Updating user by Id: {Id}", command.UserId);
+        var response = await _mediator.Send(command);
 
         if (response.IsSuccess)
         {
-            _logger.LogInformation("User with Id: {Id} successfully updated", id);
+            _logger.LogInformation("User with Id: {Id} successfully updated", command.UserId);
             return Ok(response.Value);
         }
 
-        _logger.LogError("Failed to update user with Id: {Id}. Reasons: {Reasons}", id, response.Reasons);
+        _logger.LogError("Failed to update user with Id: {Id}. Reasons: {Reasons}", command.UserId, response.Reasons);
         return NotFound(response.Reasons);
     }
 
@@ -67,17 +58,15 @@ public class UserController : ControllerBase
     [SwaggerOperation(Summary = "Обновляет текущего пользователя.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Current user successfully updated")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Current user not found", typeof(ValidationProblemDetails))]
-    public async Task<IActionResult> UpdateCurrentUser(string? username, string? password, string? email)
+    public async Task<IActionResult> UpdateCurrentUser(UpdateUserDto user)
     {
         var currentUser = HttpContext.User;
         var userId = UserServices.GetCurrentUserId(currentUser);
+
         var request = new UpdateUserByIdCommand
         {
             UserId = userId,
-            NewUsername = username,
-            NewPassword = password,
-            NewEmail = email,
-            NewUserRole = 1,
+            Data = user
         };
 
         _logger.LogInformation("Updating current user Id: {Id}", userId);
@@ -148,7 +137,7 @@ public class UserController : ControllerBase
     [SwaggerOperation(Summary = "Получает всех пользователей.")]
     [SwaggerResponse(StatusCodes.Status200OK, "All users successfully retrieved")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Users not found", typeof(ValidationProblemDetails))]
-    public async Task<IActionResult> GetAllUsers([FromQuery]GetAllUsersRequest request)
+    public async Task<IActionResult> GetAllUsers([FromQuery] GetAllUsersRequest request)
     {
         _logger.LogInformation("Retrieving all users");
         var reponse = await _mediator.Send(request);

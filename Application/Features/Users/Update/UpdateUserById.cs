@@ -8,6 +8,12 @@ namespace Application.Features.Users.Update
     public record UpdateUserByIdCommand : IRequest<Result<UpdateUserByIdDto>>
     {
         public Guid UserId { get; init; }
+        public UpdateUserDto? Data { get; init; }
+
+    }
+
+    public record UpdateUserDto
+    {
         public string? NewUsername { get; init; }
         public string? NewPassword { get; init; }
         public string? NewEmail { get; init; }
@@ -19,19 +25,24 @@ namespace Application.Features.Users.Update
     {
         public UpdateUserByIdValidator()
         {
-            RuleFor(c => c.NewUsername)
-               .Length(1, 100)
-               .Matches("^[a-zA-Z0-9]*$")
-               .WithMessage("Username can only contain alphanumeric characters");
+            RuleFor(u => u.UserId).NotEmpty();
 
-            RuleFor(c => c.NewPassword)
-               .MinimumLength(8)
-               .WithMessage("Password must be at least 8 characters long");
+            When(d => d.Data != null, () =>
+            {
+                RuleFor(c => c.Data!.NewUsername)
+                    .Length(1, 100)
+                    .Matches("^[a-zA-Z0-9]*$")
+                    .WithMessage("Username can only contain alphanumeric characters");
 
-            RuleFor(e => e.NewEmail)
-                .EmailAddress();
+                RuleFor(c => c.Data!.NewPassword)
+                   .MinimumLength(8)
+                   .WithMessage("Password must be at least 8 characters long");
 
-            RuleFor(r => r.NewUserRole).ExclusiveBetween(0, 3);
+                RuleFor(e => e.Data!.NewEmail)
+                    .EmailAddress();
+
+                RuleFor(r => r.Data!.NewUserRole).ExclusiveBetween(0, 3);
+            });
         }
     }
 
@@ -65,16 +76,16 @@ namespace Application.Features.Users.Update
                     return Result.Fail(UserNotFoundMessage);
                 }
 
-                if (request.NewUsername is not null)
-                    user.UpdateUserUsername(request.NewUsername);
+                if (request.Data!.NewUsername is not null)
+                    user.UpdateUserUsername(request.Data!.NewUsername);
 
-                if (request.NewPassword is not null)
-                    user.UpdateUserPassword(request.NewPassword);
+                if (request.Data.NewPassword is not null)
+                    user.UpdateUserPassword(request.Data!.NewPassword);
 
-                if (request.NewEmail is not null)
-                    user.UpdateUserEmail(request.NewEmail, true);
+                if (request.Data!.NewEmail is not null)
+                    user.UpdateUserEmail(request.Data!.NewEmail, true);
 
-                user.UpdateUserRole((Role)request.NewUserRole);
+                user.UpdateUserRole((Role)request.Data!.NewUserRole);
 
                 _userRepo.Update(user);
 

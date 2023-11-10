@@ -199,19 +199,17 @@ public class RecordController : ControllerBase
     [SwaggerOperation(Summary = "Изменение записи по ID.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Successful Record Change")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(ValidationProblemDetails))]
-    public async Task<IActionResult> Update(Guid recordId, string? title, DateTime deadline, string? text, bool isPrivate)
+    public async Task<IActionResult> Update(UpdateRecordDto record)
     {
         var user = HttpContext.User;
         var userId = UserServices.GetCurrentUserId(user);
+
         var request = new UpdateRecordByIdCommand
         {
             UserId = userId,
-            RecordId = recordId,
-            NewTitle = title,
-            NewDeadLine = deadline,
-            NewPrivacyStatus = isPrivate,
-            NewText = text,
+            Data = record
         };
+
         var response = await _mediator.Send(request);
         if (response.IsSuccess)
         {
