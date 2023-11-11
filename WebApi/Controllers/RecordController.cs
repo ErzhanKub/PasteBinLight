@@ -11,9 +11,10 @@ using WebApi.Services;
 
 namespace WebApi.Controllers;
 
-[Route("api/[controller]")]
+[Route("api/records")]
 [ApiController]
 [Produces("application/json")]
+[Authorize(Roles = "User, Admin")]
 public class RecordController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -54,7 +55,7 @@ public class RecordController : ControllerBase
 
         _logger.LogInformation("Created Record: {Value}", response.Value);
 
-        var recordUrl = $"https://localhost:7056/api/Record/{response.Value}";
+        var recordUrl = $"https://localhost:7056/api/records/records/encoded/{response.Value}";
         var qrCode = _QRCodeGeneratorService.GenerateQRCodeFromText(recordUrl);
 
         return Created(recordUrl, new { Url = recordUrl, QRCode = qrCode });
@@ -259,5 +260,18 @@ public class RecordController : ControllerBase
         }
         _logger.LogError("Failed to retriver records by title: {Reasons}", response.Reasons);
         return NotFound(response.Reasons);
+    }
+
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [SwaggerOperation(Summary = "Получение всех публичных записей.")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Records Retrieved Successfully")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Records Not Found", typeof(ValidationProblemDetails))]
+    [HttpGet("records/all")]
+    public async Task<IActionResult> GetAllRecords()
+    {
+        var request = new GetAllRecordsRequest();
+        var response = await _mediator.Send(request);
+        return Ok(response.Value);
     }
 }

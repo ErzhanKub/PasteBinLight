@@ -71,7 +71,7 @@ namespace Application.Features.Users.Login
                     new Claim(ClaimTypes.Role, user.Role.ToString())
                 };
 
-                var tokenString = GenerateTokenString(claims, DateTime.UtcNow.AddHours(1));
+                var tokenString = GenerateTokenString(claims, DateTime.UtcNow.AddDays(1));
 
                 _logger.LogInformation(TokenReceivedMessage, user.Id, tokenString);
 

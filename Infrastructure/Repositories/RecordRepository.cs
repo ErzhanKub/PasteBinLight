@@ -24,14 +24,6 @@ public sealed class RecordRepository : IRecordRepository
         return entity.Id;
     }
 
-    // Delete records by their IDs
-    public Task<Guid[]> RemoveByIdAsync(params Guid[] ids)
-    {
-        var posteToDelete = _dbcontext.Records.Where(p => ids.Contains(p.Id));
-        _dbcontext.Records.RemoveRange(posteToDelete);
-        return Task.FromResult(ids);
-    }
-
     // Get a record by its ID
     public async Task<Record?> FetchByIdAsync(Guid id, CancellationToken cancellationToken)
     {
@@ -61,6 +53,18 @@ public sealed class RecordRepository : IRecordRepository
         _dbcontext.Records.Update(entity);
     }
 
+    public Task<List<Record>> GetAllRecords(CancellationToken cancellationToken)
+    {
+        return _dbcontext.Records.AsNoTracking().ToListAsync(cancellationToken);
+    }
+
+    // Search records by title
+    public async Task<IReadOnlyList<Record>> FindRecordsByTitleAsync(string title, CancellationToken cancellationToken)
+    {
+        var records = await _dbcontext.Records.Where(r => r.Title.Contains(title) && r.IsPrivate == false).ToListAsync(cancellationToken) ?? new List<Record>();
+        return records;
+    }
+
     // Get all records
     public async Task<IReadOnlyList<Record>> GetAllAsync(int pageNumber, int pageSize, CancellationToken cancellationToken)
     {
@@ -69,13 +73,6 @@ public sealed class RecordRepository : IRecordRepository
         .Skip((pageNumber - 1) * pageSize)
         .Take(pageSize)
         .ToListAsync(cancellationToken);
-    }
-
-    // Search records by title
-    public async Task<IReadOnlyList<Record>> FindRecordsByTitleAsync(string title, CancellationToken cancellationToken)
-    {
-        var records = await _dbcontext.Records.Where(r => r.Title.Contains(title) && r.IsPrivate == false).ToListAsync(cancellationToken) ?? new List<Record>();
-        return records;
     }
 
     // Get top 100 posts by number of likes
@@ -88,4 +85,13 @@ public sealed class RecordRepository : IRecordRepository
             .Take(100)
             .ToListAsync(cancellationToken);
     }
+
+    // Delete records by their IDs
+    public Task<Guid[]> RemoveByIdAsync(params Guid[] ids)
+    {
+        var posteToDelete = _dbcontext.Records.Where(p => ids.Contains(p.Id));
+        _dbcontext.Records.RemoveRange(posteToDelete);
+        return Task.FromResult(ids);
+    }
+
 }

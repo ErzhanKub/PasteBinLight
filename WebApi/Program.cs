@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using Swashbuckle.AspNetCore.Filters;
 using System.Text;
 using WebApi.Middlewere;
 
@@ -21,9 +22,12 @@ builder.Services.AddEndpointsApiExplorer();
 // Configure CORS to allow any method, origin, and header
 builder.Services.AddCors(opts => opts.AddDefaultPolicy(opts => opts.AllowAnyMethod().AllowAnyOrigin().AllowAnyHeader()));
 
+builder.Services.AddSwaggerExamplesFromAssemblyOf<Program>();
+
 // Configure Swagger for API documentation
 builder.Services.AddSwaggerGen(c =>
 {
+    c.EnableAnnotations();
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "FP", Version = "v2077" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
@@ -37,11 +41,11 @@ builder.Services.AddSwaggerGen(c =>
         {
             new OpenApiSecurityScheme
             {
-            Reference = new OpenApiReference
-            {
-                Type = ReferenceType.SecurityScheme,
-                Id = "Bearer"
-            }
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
             },
             new string[] { }
         }
