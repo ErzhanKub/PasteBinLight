@@ -3,7 +3,7 @@
 namespace Application.Features.Records.Delete
 {
     // Command to delete a record by its ID
-    public record DeleteRecordByIdCommand : IRequest<Result<Guid>>
+    public sealed record DeleteRecordByIdCommand : IRequest<Result<Guid>>
     {
         public Guid UserId { get; set; }
         public Guid RecordId { get; init; }

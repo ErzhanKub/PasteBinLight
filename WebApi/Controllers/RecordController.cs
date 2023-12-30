@@ -1,4 +1,6 @@
-﻿using Application.Features.Records.Create;
+﻿#region usings
+using Application.Contracts;
+using Application.Features.Records.Create;
 using Application.Features.Records.Delete;
 using Application.Features.Records.Get;
 using Application.Features.Records.Update;
@@ -8,12 +10,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using WebApi.Services;
+#endregion 
 
 namespace WebApi.Controllers;
 
 [Route("api/records")]
 [ApiController]
-[Produces("application/json")]
 [Authorize(Roles = "User, Admin")]
 public class RecordController : ControllerBase
 {
@@ -29,13 +31,11 @@ public class RecordController : ControllerBase
     }
 
     // Endpoint to create a new record
-    [HttpPost("records")]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    [SwaggerOperation(Summary = "Создает новую запись.")]
-    [SwaggerResponse(StatusCodes.Status201Created, "Record Created Successfully")]
-    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid Request", typeof(ValidationProblemDetails))]
+    [HttpPost]
+    [SwaggerOperation(Summary = "Creates a new record")]
+    [SwaggerResponse(StatusCodes.Status201Created, "Record Created Successfully", typeof(CreatedResult))] // ToDo: use a more appropriate return type
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid Request", typeof(List<FluentResults.IReason>))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Invalid Request", typeof(ProblemDetails))]
     public async Task<IActionResult> CreateRecord(CreateRecordDto record)
     {
         var currentUser = HttpContext.User;
@@ -55,7 +55,9 @@ public class RecordController : ControllerBase
 
         _logger.LogInformation("Created Record: {Value}", response.Value);
 
-        var recordUrl = $"https://localhost:7056/api/records/records/encoded/{response.Value}";
+        // ToDo: use configuration or another approach (not hard code)
+        var recordUrl = $"https://localhost:7056/api/records/encoded/{response.Value}";
+
         var qrCode = _QRCodeGeneratorService.GenerateQRCodeFromText(recordUrl);
 
         return Created(recordUrl, new { Url = recordUrl, QRCode = qrCode });
@@ -63,12 +65,10 @@ public class RecordController : ControllerBase
 
     // Endpoint to get a record by encoded GUID
     [HttpGet("records/encoded/{encodedGuid}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    [SwaggerOperation(Summary = "Получает запись по кодированному GUID.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "Record Retrieved Successfully")]
-    [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(ValidationProblemDetails))]
+    [SwaggerOperation(Summary = "Retrieves the entry by encoded GUID")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Record Retrieved Successfully", typeof(RecordDto))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(List<FluentResults.IReason>))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Invalid Request", typeof(ProblemDetails))]
     public async Task<IActionResult> GetRecord(string encodedGuid)
     {
         var currentUser = HttpContext.User;
@@ -92,11 +92,10 @@ public class RecordController : ControllerBase
 
     // Endpoint to get all public records with pagination
     [HttpGet("records/public")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(Summary = "Получает все публичные записи.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "All Records Retrieved Successfully")]
-    [SwaggerResponse(StatusCodes.Status404NotFound, "Records Not Found", typeof(ValidationProblemDetails))]
+    [SwaggerOperation(Summary = "Retrieves all public records")]
+    [SwaggerResponse(StatusCodes.Status200OK, "All Records Retrieved Successfully", typeof(AllRecordsDto))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Records Not Found", typeof(List<FluentResults.IReason>))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Invalid Request", typeof(ProblemDetails))]
     public async Task<IActionResult> GetAllPublicRecords([FromQuery] GetAllPublicRecordsRequest request)
     {
         var response = await _mediator.Send(request);
@@ -112,11 +111,10 @@ public class RecordController : ControllerBase
 
     // Endpoint to get all records for the current user
     [HttpGet("records/user")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(Summary = "Получение своих записей.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "All Records Retrieved Successfully")]
-    [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(ValidationProblemDetails))]
+    [SwaggerOperation(Summary = "Receive your records")]
+    [SwaggerResponse(StatusCodes.Status200OK, "All Records Retrieved Successfully", typeof(List<AllRecordsDto>))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(List<FluentResults.IReason>))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Invalid Request", typeof(ProblemDetails))]
     public async Task<IActionResult> GetAllUserRecords()
     {
         var user = HttpContext.User;
@@ -137,12 +135,10 @@ public class RecordController : ControllerBase
 
     // Endpoint to get a record by ID
     [HttpGet("records/{recordId}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    [SwaggerOperation(Summary = "Получает запись по ID.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "Record Retrieved Successfully")]
-    [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(ValidationProblemDetails))]
+    [SwaggerOperation(Summary = "Retrieves a record by ID")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Record Retrieved Successfully", typeof(RecordDto))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(List<FluentResults.IReason>))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Invalid Request", typeof(ProblemDetails))]
     public async Task<IActionResult> GetRecordById(Guid recordId)
     {
         var currentUser = HttpContext.User;
@@ -165,13 +161,11 @@ public class RecordController : ControllerBase
     }
 
     // Endpoint to delete a record
-    [HttpDelete("records/{recordId}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    [SwaggerOperation(Summary = "Удаляет запись по ID.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "Record Deleted Successfully")]
-    [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(ValidationProblemDetails))]
+    [HttpDelete("{recordId}")]
+    [SwaggerOperation(Summary = "Deletes an record by ID")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Record Deleted Successfully",typeof(Guid))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(List<FluentResults.IReason>))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Invalid Request", typeof(ProblemDetails))]
     public async Task<IActionResult> DeleteRecord(Guid recordId)
     {
         var user = HttpContext.User;
@@ -195,9 +189,7 @@ public class RecordController : ControllerBase
 
     // Endpoint to update a record
     [HttpPut("records/{recordId}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(Summary = "Изменение записи по ID.")]
+    [SwaggerOperation(Summary = "")]
     [SwaggerResponse(StatusCodes.Status200OK, "Successful Record Change")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(ValidationProblemDetails))]
     public async Task<IActionResult> Update(UpdateRecordDto record)

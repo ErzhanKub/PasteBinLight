@@ -6,7 +6,7 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using Swashbuckle.AspNetCore.Filters;
 using System.Text;
-using WebApi.Middlewere;
+using WebApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
