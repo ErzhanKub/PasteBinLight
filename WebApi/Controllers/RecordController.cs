@@ -64,7 +64,7 @@ public class RecordController : ControllerBase
     }
 
     // Endpoint to get a record by encoded GUID
-    [HttpGet("records/encoded/{encodedGuid}")]
+    [HttpGet("encoded/{encodedGuid}")]
     [SwaggerOperation(Summary = "Retrieves the entry by encoded GUID")]
     [SwaggerResponse(StatusCodes.Status200OK, "Record Retrieved Successfully", typeof(RecordDto))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(List<FluentResults.IReason>))]
@@ -91,7 +91,7 @@ public class RecordController : ControllerBase
     }
 
     // Endpoint to get all public records with pagination
-    [HttpGet("records/public")]
+    [HttpGet("public")]
     [SwaggerOperation(Summary = "Retrieves all public records")]
     [SwaggerResponse(StatusCodes.Status200OK, "All Records Retrieved Successfully", typeof(AllRecordsDto))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Records Not Found", typeof(List<FluentResults.IReason>))]
@@ -110,7 +110,7 @@ public class RecordController : ControllerBase
 
 
     // Endpoint to get all records for the current user
-    [HttpGet("records/user")]
+    [HttpGet("user")]
     [SwaggerOperation(Summary = "Receive your records")]
     [SwaggerResponse(StatusCodes.Status200OK, "All Records Retrieved Successfully", typeof(List<AllRecordsDto>))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(List<FluentResults.IReason>))]
@@ -134,7 +134,7 @@ public class RecordController : ControllerBase
     }
 
     // Endpoint to get a record by ID
-    [HttpGet("records/{recordId}")]
+    [HttpGet("{recordId}")]
     [SwaggerOperation(Summary = "Retrieves a record by ID")]
     [SwaggerResponse(StatusCodes.Status200OK, "Record Retrieved Successfully", typeof(RecordDto))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(List<FluentResults.IReason>))]
@@ -188,7 +188,7 @@ public class RecordController : ControllerBase
     }
 
     // Endpoint to update a record
-    [HttpPut("records/{recordId}")]
+    [HttpPut("{recordId}")]
     [SwaggerOperation(Summary = "")]
     [SwaggerResponse(StatusCodes.Status200OK, "Successful Record Change")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(ValidationProblemDetails))]
@@ -214,7 +214,7 @@ public class RecordController : ControllerBase
     }
 
     // Endpoint to get top 100 records
-    [HttpGet("records/popularity")]
+    [HttpGet("popularity")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Получение топ 100 записей.")]
@@ -235,7 +235,7 @@ public class RecordController : ControllerBase
     }
 
     // Endpoint to get records by title
-    [HttpGet("records/title/{title}")]
+    [HttpGet("title/{title}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [SwaggerOperation(Summary = "Получение записей по названию.")]
@@ -259,7 +259,7 @@ public class RecordController : ControllerBase
     [SwaggerOperation(Summary = "Получение всех публичных записей.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Records Retrieved Successfully")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Records Not Found", typeof(ValidationProblemDetails))]
-    [HttpGet("records/all")]
+    [HttpGet("all")]
     public async Task<IActionResult> GetAllRecords()
     {
         var request = new GetAllRecordsRequest();
