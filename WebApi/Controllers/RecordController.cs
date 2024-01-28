@@ -1,4 +1,4 @@
-﻿#region usings
+﻿#region using
 using Application.Contracts;
 using Application.Features.Records.Create;
 using Application.Features.Records.Delete;
@@ -17,7 +17,7 @@ namespace WebApi.Controllers;
 [Route("api/records")]
 [ApiController]
 [Authorize(Roles = "User, Admin")]
-public class RecordController : ControllerBase
+public sealed class RecordController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IQRCodeGeneratorService _QRCodeGeneratorService;
@@ -189,9 +189,10 @@ public class RecordController : ControllerBase
 
     // Endpoint to update a record
     [HttpPut("{recordId}")]
-    [SwaggerOperation(Summary = "")]
-    [SwaggerResponse(StatusCodes.Status200OK, "Successful Record Change")]
+    [SwaggerOperation(Summary = "Updates a record by Id")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Successful Record Change", typeof(RecordDto))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Record Not Found", typeof(ValidationProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Server error", typeof(ProblemDetails))]
     public async Task<IActionResult> Update(UpdateRecordDto record)
     {
         var user = HttpContext.User;
@@ -215,11 +216,10 @@ public class RecordController : ControllerBase
 
     // Endpoint to get top 100 records
     [HttpGet("popularity")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(Summary = "Получение топ 100 записей.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "Records Retrieved Successfully")]
+    [SwaggerOperation(Summary = "Getting the top 100 entries")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Records Retrieved Successfully", typeof(List<AllRecordsDto>))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Records Not Found", typeof(ValidationProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Server error", typeof(ProblemDetails))]
     public async Task<IActionResult> FetchTopRecordsByPopularity()
     {
         var request = new FetchByPopularityRequest();
@@ -236,11 +236,10 @@ public class RecordController : ControllerBase
 
     // Endpoint to get records by title
     [HttpGet("title/{title}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(Summary = "Получение записей по названию.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "Records Retrieved Successfully")]
+    [SwaggerOperation(Summary = "Retrieving records by title")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Records Retrieved Successfully", typeof(List<AllRecordsDto>))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Records Not Found", typeof(ValidationProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Server error", typeof(ProblemDetails))]
     public async Task<IActionResult> FetchRecordsByTitle(string title)
     {
         var request = new RecordByTitleRequest { RecordTitle = title };
@@ -254,12 +253,11 @@ public class RecordController : ControllerBase
         return NotFound(response.Reasons);
     }
 
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(Summary = "Получение всех публичных записей.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "Records Retrieved Successfully")]
-    [SwaggerResponse(StatusCodes.Status404NotFound, "Records Not Found", typeof(ValidationProblemDetails))]
     [HttpGet("all")]
+    [SwaggerOperation(Summary = "Retrieving all public records")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Records Retrieved Successfully", typeof(List<AllRecordsDto>))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Records Not Found", typeof(ValidationProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Server error", typeof(ProblemDetails))]
     public async Task<IActionResult> GetAllRecords()
     {
         var request = new GetAllRecordsRequest();

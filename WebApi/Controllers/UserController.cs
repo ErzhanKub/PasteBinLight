@@ -1,4 +1,6 @@
-﻿using Application.Features.Users;
+﻿#region using
+using Application.Contracts;
+using Application.Features.Users;
 using Application.Features.Users.Delete;
 using Application.Features.Users.Get;
 using Application.Features.Users.Update;
@@ -10,13 +12,13 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using System.Web;
 using WebApi.Services;
+#endregion
 
 namespace WebApi.Controllers;
 
 [Route("api/users")]
 [ApiController]
-[Produces("application/json")]
-public class UserController : ControllerBase
+public sealed class UserController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly ITelegramService _telegramService;
@@ -31,11 +33,10 @@ public class UserController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpPut("{id}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(Summary = "Обновляет пользователя по Id.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "User successfully updated")]
+    [SwaggerOperation(Summary = "Updates user by Id")]
+    [SwaggerResponse(StatusCodes.Status200OK, "User successfully updated", typeof(UpdateUserByIdDto))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ValidationProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Server Error", typeof(ProblemDetails))]
     public async Task<IActionResult> UpdateUserById(UpdateUserByIdCommand command)
     {
         _logger.LogInformation("Updating user by Id: {Id}", command.UserId);
@@ -53,11 +54,10 @@ public class UserController : ControllerBase
 
     [Authorize(Roles = "User, Admin")]
     [HttpPut("me")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(Summary = "Обновляет текущего пользователя.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "Current user successfully updated")]
+    [SwaggerOperation(Summary = "Updates the current user")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Current user successfully updated", typeof(UpdateUserByIdDto))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Current user not found", typeof(ValidationProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Server error", typeof(ProblemDetails))]
     public async Task<IActionResult> UpdateCurrentUser(UpdateUserDto user)
     {
         var currentUser = HttpContext.User;
@@ -84,11 +84,10 @@ public class UserController : ControllerBase
 
     [Authorize(Roles = "User, Admin")]
     [HttpGet("{userId}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(Summary = "Получает пользователя по Id.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "User successfully retrieved")]
+    [SwaggerOperation(Summary = "Gets user by Id")]
+    [SwaggerResponse(StatusCodes.Status200OK, "User successfully retrieved", typeof(UserDto))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ValidationProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Server error", typeof(ProblemDetails))]
     public async Task<IActionResult> GetUserById(Guid userId)
     {
         var request = new FetchUserByIdRequest
@@ -111,11 +110,10 @@ public class UserController : ControllerBase
 
     [Authorize(Roles = "User, Admin")]
     [HttpGet("username/{username}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(Summary = "Получает пользователя по username.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "User successfully retrieved")]
+    [SwaggerOperation(Summary = "Gets the user by username")]
+    [SwaggerResponse(StatusCodes.Status200OK, "User successfully retrieved", typeof(UserDto))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ValidationProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Server error", typeof(ProblemDetails))]
     public async Task<IActionResult> GetUserByUsername(string username)
     {
         var request = new FetchUserByUsernameRequest { TargetUsername = username };
@@ -135,11 +133,10 @@ public class UserController : ControllerBase
 
     [Authorize(Roles = "User, Admin")]
     [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(Summary = "Получает всех пользователей.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "All users successfully retrieved")]
+    [SwaggerOperation(Summary = "Gets all users")]
+    [SwaggerResponse(StatusCodes.Status200OK, "All users successfully retrieved", typeof(List<UserDto>))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Users not found", typeof(ValidationProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Server error", typeof(ProblemDetails))]
     public async Task<IActionResult> GetAllUsers([FromQuery] GetAllUsersRequest request)
     {
         _logger.LogInformation("Retrieving all users");
@@ -157,11 +154,10 @@ public class UserController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpDelete]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(Summary = "Удаляет пользователя по Id.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "User successfully deleted")]
+    [SwaggerOperation(Summary = "Deletes a user by Id")]
+    [SwaggerResponse(StatusCodes.Status200OK, "User successfully deleted", typeof(Guid[]))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ValidationProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Server error", typeof(ProblemDetails))]
     public async Task<IActionResult> DeleteById(DeleteUsersByIdsCommand command)
     {
         _logger.LogInformation("Deleting user by ID: {Id}", command.UserIds);
@@ -179,11 +175,10 @@ public class UserController : ControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpDelete("me/{username}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(Summary = "Удаляет пользователя по Username.")]
+    [SwaggerOperation(Summary = "Deletes a user by Username")]
     [SwaggerResponse(StatusCodes.Status200OK, "User successfully deleted")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "User not found", typeof(ValidationProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Server error", typeof(ProblemDetails))]
     public async Task<IActionResult> DeleteByUsername(string username)
     {
         var command = new DeleteByUsernameCommand { TargetUsername = username };
@@ -203,11 +198,10 @@ public class UserController : ControllerBase
 
     [Authorize(Roles = "User, Admin")]
     [HttpDelete("me")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(Summary = "Удаляет текущего пользователя.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "Current user successfully deleted")]
+    [SwaggerOperation(Summary = "Deletes the current user")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Current user successfully deleted", typeof(Guid[]))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Current user not found", typeof(ValidationProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Server error", typeof(ProblemDetails))]
     public async Task<IActionResult> DeleteCurrentUser()
     {
         var currentUser = HttpContext.User;
@@ -233,11 +227,10 @@ public class UserController : ControllerBase
 
     [Authorize(Roles = "User, Admin")]
     [HttpPatch("confirm/{confirmToken}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [SwaggerOperation(Summary = "Подтверждает электронную почту.")]
-    [SwaggerResponse(StatusCodes.Status200OK, "Mail confirmed", typeof(User))]
+    [SwaggerOperation(Summary = "Confirms email")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Mail confirmed")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Mail not confirmed", typeof(ValidationProblemDetails))]
+    [SwaggerResponse(StatusCodes.Status500InternalServerError, "Server error", typeof(ProblemDetails))]
     public async Task<IActionResult> ConfirmEmail(string confirmToken)
     {
         var currentUser = HttpContext.User;

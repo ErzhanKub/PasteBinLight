@@ -1,10 +1,12 @@
-﻿using Application.Contracts;
+﻿#region using
+using Application.Contracts;
 using Application.Features.Users.Create;
 using Application.Features.Users.Login;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+#endregion
 
 namespace WebApi.Controllers;
 
